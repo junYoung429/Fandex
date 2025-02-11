@@ -7,8 +7,10 @@
 
 
     width: calc(100% - 40px);         /* 좌우 마진 고려하여 부모 너비에 맞춤 */
-    height: 52px; /* 고정 높이 */
+    height: 76px; /* 고정 높이 */
     margin: 0 auto;                  /* 부모 내에서 가운데 정렬 */
+    box-sizing: border-box;
+
 
     background-color: #414147;
     padding: 12px 14px;
@@ -21,7 +23,7 @@ textarea::placeholder {
     font-style: normal;
     font-weight: 500;
     line-height: 20px; /* 142.857% */    
-    font-family: 'SUIT-Regular', sans-serif;
+    font-family: 'SUITE Variable', sans-serif;
     
 }
 
@@ -34,7 +36,7 @@ textarea::placeholder {
     color: #fff;
     font-size: 14px;
 
-    padding-right: 35px; /* 아이콘과 겹치지 않도록 오른쪽 패딩 추가 */
+    padding-right: 25px; /* 아이콘과 겹치지 않도록 오른쪽 패딩 추가 */
 
 
     /* 텍스트 입력 스타일 */
@@ -48,8 +50,8 @@ textarea::placeholder {
 /* 업로드 아이콘 스타일 */
 .upload-icon {
     position: absolute;
-    right: 12px; /* 오른쪽 끝에 고정 */
-    top: 40px; /* 아이콘을 상단에서 30px 아래로 위치시킴 */
+    right: 14px; /* 오른쪽 끝에 고정 */
+    top: 44px; /* 아이콘을 상단에서 30px 아래로 위치시킴 */
     width: 20px;
     height: 20px;
     fill: #939393;
@@ -63,7 +65,7 @@ textarea::placeholder {
 
 /* 폰트 SUIT */
 @font-face {
-    font-family: 'SUIT-Regular';
+    font-family: 'SUITE Variable';
     src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Regular.woff2') format('woff2');
     font-weight: normal;
     font-style: normal;
@@ -75,7 +77,7 @@ textarea::placeholder {
     width: calc(100% - 40px); /* 좌우 20px씩 여백 적용 */
     box-sizing: border-box;
     margin: 0 auto;                  /* 부모 내에서 가운데 정렬 */
-
+    margin-bottom: 16px;
 
 
   }
@@ -87,9 +89,17 @@ textarea::placeholder {
   }
   
   .text {
-    font-family: 'SUIT-Regular', sans-serif;
+    font-family: 'SUITE Variable', sans-serif;
     font-size: 24px;
     font-weight: bold;
     color: white;
   }
+
+@font-face {
+    font-family: 'SUITE Variable';
+    src: url('/fonts/SUITE-Variable.woff2') format('woff2'); 
+    font-weight: 100 900; /* 가변 폰트 지원 */
+    font-style: normal;
+
+}
 
