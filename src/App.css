@@ -1,7 +1,6 @@
 /* 기본 모바일 스타일 (모바일 우선) */
 .container {
     width: 100%;
-    max-width: 375px;  /* 모바일 기준 최대 너비 */
     margin: 0 auto;    /* 가운데 정렬 */
     box-sizing: border-box;
     min-height: 100vh;
