@@ -1,1 +1,24 @@
-
+/* 기본 모바일 스타일 (모바일 우선) */
+.container {
+    width: 100%;
+    max-width: 375px;  /* 모바일 기준 최대 너비 */
+    margin: 0 auto;    /* 가운데 정렬 */
+    box-sizing: border-box;
+    min-height: 100vh;
+    background-color: #101021;  /* 예시 배경색 */
+  }
+  
+  /* 태블릿 이상 (예: 768px 이상) */
+  @media (min-width: 768px) {
+    .container {
+      max-width: 768px;
+    }
+  }
+  
+  /* 데스크탑 이상 (예: 1024px 이상) */
+  @media (min-width: 1024px) {
+    .container {
+      max-width: 1024px;
+    }
+  }
+  

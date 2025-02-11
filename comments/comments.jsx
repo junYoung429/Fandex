@@ -5,12 +5,11 @@ function Comments() {
     const [text, setText] = useState("");
 
     return (
-        <div className="container">
+        <div>
             <div className="input-wrapper">
-                <input
-                    type="text"
-                    placeholder="Enter text"
-                    className="comment-box"
+            <textarea
+                    className="comment"
+                    placeholder="댓글은 10자 이상 200자 이하로 작성해주세요."
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                 />
@@ -24,8 +23,7 @@ function UploadIcon() {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
+   
             viewBox="0 0 20 20"
             className="upload-icon"
         >
