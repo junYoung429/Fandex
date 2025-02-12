@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import './App.css'
-import Comments from '../comments/comments'
+import CommentInput from '../comments/commentInput'
+import CommentScroll from '../comments/commentScroll';
 
 function App() {
   return(
     <>
     <div className="container">
-      <Comments />
+      <div style={{ marginBottom: '100px', height: '100px', backgroundColor: 'transparent' }}></div>
+      <CommentInput />
+      <CommentScroll />
     </div>
 
     </>
