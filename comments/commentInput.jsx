@@ -10,11 +10,6 @@ function CommentInput() {
     // Popup 표시 여부를 관리하는 상태
     const [showPopup, setShowPopup] = useState(false);
 
-    // InfoIcon 클릭 시 팝업을 표시
-    const handleInfoIconClick = () => {
-        setShowPopup(true);
-    };
-
     return (
         <div>
             <div className="row">

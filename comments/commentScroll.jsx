@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./commentScroll.css";
-import { DefaultProfile } from "../components/Icons";
+import { DefaultProfileIcon } from "../components/Icons";
 import { ThumbUp, ThumbDown } from "../components/Icons";
 
 function CommentScroll() {
@@ -60,7 +60,7 @@ const Comments = () => {
 
     return(
         <div className="comment-container">
-            <DefaultProfile/>
+            <DefaultProfileIcon/>
             <div id="comment">
                 <div className="comment-title">
                     <span id="username">{userName}</span>·<span id="date-time">{dateTime}</span>

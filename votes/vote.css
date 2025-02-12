@@ -1,0 +1,74 @@
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    width: calc(100% - 40px); /* 좌우 20px씩 여백 적용 */
+    box-sizing: border-box;
+    margin: 0 auto;                  /* 부모 내에서 가운데 정렬 */
+    margin-bottom: 16px;
+    align-items: center;
+  }
+  
+  .left {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* 아이콘과 글자 간격 */
+
+  }
+  
+  .left-text {
+    font-family: 'SUITE Variable', sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    font-weight: 900;
+  }
+
+@font-face {
+    font-family: 'SUITE Variable';
+    src: url('/fonts/SUITE-Variable.woff2') format('woff2'); 
+    font-weight: 100 900; /* 가변 폰트 지원 */
+    font-style: normal;
+
+}
+
+.alert-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* 부모 컨테이너 너비 유지 */
+    height: 20px; /* 공간을 차지하도록 설정 */
+}
+
+.alert-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    width: 100%; /* 부모 컨테이너 너비 유지 */
+    justify-content: center;
+}
+
+.alert-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: 'SUITE Variable', sans-serif;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    color: white;
+}
+
+/* 알림이 없을 때도 공간을 유지하는 빈 placeholder */
+.alert-placeholder {
+    height: 20px; /* 동일한 높이를 유지 */
+    visibility: hidden; /* 요소는 존재하지만 보이지 않게 함 */
+}
+
+/* 강조할 부분 (유저 또는 인물) */
+.alert-highlight {
+    font-weight: 700; /* 강조된 텍스트 */
+}
+

@@ -12,8 +12,7 @@ const Popup = ({ onClose }) => {
           임의로 삭제될 수 있어요.
         </p>
       </div>
-    </div>,
-    document.getElementById("popup-root") // 🔥 body에 추가하여 전체 화면을 덮도록 함
+    </div>
   );
 };
   

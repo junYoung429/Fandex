@@ -14,7 +14,13 @@
     height: 20px;
 }
 
-.profile{
+.defaultprofile{
+    width: 32x;
+    height: 32px;
+    margin-top: 4px;
+}
+
+.myprofile{
     width: 32x;
     height: 32px;
     margin-top: 4px;
