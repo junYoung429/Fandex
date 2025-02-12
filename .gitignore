@@ -9,6 +9,7 @@ lerna-debug.log*
 
 # API Keys
 apikey.js
+.env
 
 node_modules
 dist
