@@ -1,16 +1,17 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { API_KEY } from "./apikey"; // ✅ 업데이트된 API 키 불러오기
+
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBqAgnFDwd7Bkr1VegpGKkR1mxrmJ6fXQc",
-  authDomain: "fandextest.firebaseapp.com",
-  projectId: "fandextest",
-  storageBucket: "fandextest.firebasestorage.app",
-  messagingSenderId: "16930056700",
-  appId: "1:16930056700:web:5e6471bc9ae8c2028f2a79",
-  measurementId: "G-6NCQSKZ0HG"
+    apiKey: API_KEY,
+    authDomain: AUTH_DOMAIN,
+    projectId: PROJECT_ID,
+    storageBucket: STORAGE_BUCKET,
+    messagingSenderId: MESSAGING_SENDER_ID,
+    appId: APP_ID,
+    measurementId: MEASUREMENT_ID
 };
 
 // Initialize Firebase
