@@ -91,6 +91,7 @@
 .comment-thumb{
     display: flex;
     justify-content: flex-end; /* 내부 요소를 오른쪽 정렬 */
+ 
     align-items: center;
     margin-top: 8px;
     font-family: 'SUITE Variable', sans-serif;
@@ -99,3 +100,4 @@
     font-weight: 500;
     line-height: normal;
 }
+

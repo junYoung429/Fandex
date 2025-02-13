@@ -29,6 +29,9 @@
     width: 24px;
     height: 24px;
     margin-right: 4px;
+
+    cursor: pointer;
+    pointer-events: auto;
 }
 
 
@@ -37,4 +40,7 @@
     height: 24px;
     margin-left: 8px;
     margin-right: 4px;
+
+    cursor: pointer;
+    pointer-events: auto;
 }

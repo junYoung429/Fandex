@@ -12,6 +12,8 @@ import Vote from '../votes/vote';
 function App() {
 
   const [userUUID, setUserUUID] = useState(null); // ✅ userUUID를 상태로 관리. CommentInput에 props로 넘겨주기 위해 전역 관리
+  const [refresh, setRefresh] = useState(false); // 🔹 댓글이 추가될 때마다 재렌더링 트리거
+
 
   useEffect(() => {
     const initializeUser = async () => {
@@ -62,9 +64,9 @@ function App() {
       <div style={{ marginBottom: '100px', height: '100px', backgroundColor: 'transparent' }}></div>
       <Vote/>
 
-      <CommentInput userUUID={userUUID}/>
-      <CommentScroll />
-    </div>
+      <CommentInput userUUID={userUUID} setRefresh={setRefresh}/>
+      <CommentScroll userUUID={userUUID} refresh={refresh} setRefresh={setRefresh} />
+      </div>
 
     </>
   );
