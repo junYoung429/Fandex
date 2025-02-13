@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { db } from "./firebase-config"; // 🔹 db import 추가!
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid"; // UUID 생성 라이브러리
@@ -10,12 +10,15 @@ import CommentScroll from '../comments/commentScroll';
 import Vote from '../votes/vote';
 
 function App() {
+
+  const [userUUID, setUserUUID] = useState(null); // ✅ userUUID를 상태로 관리. CommentInput에 props로 넘겨주기 위해 전역 관리
+
   useEffect(() => {
     const initializeUser = async () => {
       const SERVICE_NAME = "Fandex"; // 서비스 고유 이름
       const USER_KEY = `${SERVICE_NAME}_userUUID`; // "Fandex_userUUID"
       
-      let userUUID = localStorage.getItem(USER_KEY); // 우리 서비스 전용 UUID 가져오기
+      let storedUUID = localStorage.getItem(USER_KEY); // 우리 서비스 전용 UUID 가져오기
 
       // 랜덤 이름 생성 로직
       function generateRandomUserName() {
@@ -23,19 +26,21 @@ function App() {
         return `${adjectives[randomIndex]} 유령`;
       }
       
-      if (!userUUID) {
-        userUUID = uuidv4(); // 새 UUID 생성
-        localStorage.setItem(USER_KEY, userUUID); // 우리 서비스 전용 UUID 저장
+      if (!storedUUID) {
+        storedUUID = uuidv4(); // 새 UUID 생성
+        localStorage.setItem(USER_KEY, storedUUID); // 우리 서비스 전용 UUID 저장
       }
+
+      setUserUUID(storedUUID); // ✅ 상태 업데이트
       
       // Firestore에 해당 UUID의 유저가 존재하는지 확인
-      const userDocRef = doc(db, "users", userUUID);
+      const userDocRef = doc(db, "users", storedUUID);
       const userDocSnap = await getDoc(userDocRef);
 
       if (!userDocSnap.exists()) {
         // Firestore에 유저 데이터 추가
         const newUser = {
-          uid: userUUID,
+          uid: storedUUID,
           displayName: generateRandomUserName(),
           profileImage: "image",
           createAt: new Date().toISOString(),
@@ -43,10 +48,8 @@ function App() {
 
         await setDoc(userDocRef, newUser);
         console.log("새로운 유저가 Firestore에 추가되었습니다:", newUser);
-        console.log("유저 이름:", userDocSnap.data().displayName); // 생성된 유저 이름 확인
       } else {
         console.log("이미 등록된 유저입니다:", userDocSnap.data());
-        console.log("유저 이름:", userDocSnap.data().displayName); // 생성된 유저 이름 확인
       }
     };
 
@@ -59,7 +62,7 @@ function App() {
       <div style={{ marginBottom: '100px', height: '100px', backgroundColor: 'transparent' }}></div>
       <Vote/>
 
-      <CommentInput />
+      <CommentInput userUUID={userUUID}/>
       <CommentScroll />
     </div>
 
