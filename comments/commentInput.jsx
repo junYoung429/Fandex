@@ -3,13 +3,17 @@ import "./commentInput.css"; // CSS 파일 임포트
 import { UploadIcon, InfoIcon } from "../components/Icons";
 
 import { db } from "../src/firebase-config";
-import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore"; // Firestore 관련 메서드
+import { collection, addDoc, serverTimestamp, doc, getDoc,   getDocs
+} from "firebase/firestore"; // Firestore 관련 메서드
 
 
-function CommentInput({ userUUID, setRefresh }) { // 🔹 setRefresh를 props로 받아옴
+function CommentInput({ userUUID, setRefresh, refresh }) { 
     // 입력 텍스트
     const [text, setText] = useState("");
     const [userName, setUserName] = useState("익명 유령");
+    // 댓글 총 개수
+    const [commentCount, setCommentCount] = useState(0);
+
 
     // 유저네임 가져오는 비동기 과정
     useEffect(() => {
@@ -32,6 +36,21 @@ function CommentInput({ userUUID, setRefresh }) { // 🔹 setRefresh를 props로
 
         fetchUserName();
     }, [userUUID]);
+
+      // ✅ 댓글 개수 가져오기
+    useEffect(() => {
+        const fetchCommentCount = async () => {
+        try {
+            const commentRef = collection(db, "voteResults", "투표대상1", "comments");
+            const snapshot = await getDocs(commentRef);
+            setCommentCount(snapshot.size); // 문서 개수
+        } catch (error) {
+            console.error("댓글 개수를 불러오는 중 오류 발생:", error);
+        }
+        };
+        fetchCommentCount();
+    }, [refresh]); 
+    // refresh 값이 변경될 때마다 새로 불러옴
 
     //댓글이 10자 이상인지 여부 확인
     const isValidComment = text.length >= 10; 
@@ -76,8 +95,8 @@ function CommentInput({ userUUID, setRefresh }) { // 🔹 setRefresh를 props로
                     <span className="left-text">댓글</span>
                     <InfoIcon/>
                 </div>
-                <span className="right-text">nn개</span>
-            </div>
+                <span className="right-text">{commentCount}개</span>
+                </div>
             <div className="input-wrapper">
             <textarea
                     className="comment"

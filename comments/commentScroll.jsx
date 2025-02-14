@@ -3,7 +3,7 @@ import "./commentScroll.css";
 import { DefaultProfileIcon, ThumbUp, ThumbDown } from "../components/Icons";
 import { db } from "../src/firebase-config"; // 🔹 Firestore 설정 불러오기
 import { collection, getDocs, doc, getDoc, query, orderBy, updateDoc, increment, arrayUnion, arrayRemove  } from "firebase/firestore";
-
+import HorseImage from "./horse";
 
 function CommentScroll({ userUUID, refresh, setRefresh }) {
   return (
@@ -82,7 +82,14 @@ const CommentList = ({ userUUID, refresh, setRefresh }) => {
                   <Comments key={comment.id} comment={comment} userUUID={userUUID} setRefresh={setRefresh}/>
               ))
           ) : (
-              <p className="no-comments">아직 댓글이 없습니다.</p>
+            <>
+              <div className="no-comments">
+                <HorseImage imagePath="horse.png"/>
+              </div>
+              <p className="no-comments"> 아직 댓글이 없습니다.</p>
+              
+              <div className="spacer"> </div>
+            </>
           )}
       </div>
   );
