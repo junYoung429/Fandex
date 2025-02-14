@@ -64,9 +64,17 @@ function App() {
 
         await setDoc(userDocRef, newUser);
         console.log("새로운 유저가 Firestore에 추가되었습니다:", newUser);
+        // localStorage에 저장
+        localStorage.setItem("Fandex_userName", newUser.displayName);
+        localStorage.setItem("Fandex_userProfile", newUser.profileImage);
       } else {
-        console.log("이미 등록된 유저입니다:", userDocSnap.data());
-      }    };
+        const userData = userDocSnap.data();
+        console.log("이미 등록된 유저입니다:", userData);
+        // localStorage에 업데이트
+        localStorage.setItem("Fandex_userName", userData.displayName);
+        localStorage.setItem("Fandex_userProfile", userData.profileImage);
+      }
+    };
 
     initializeUser();
   }, []);
