@@ -127,3 +127,20 @@
 
     margin-top: 240px;
 }
+
+.loading{
+    font-family: 'SUITE Variable', sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    color: white;
+
+    display: flex;
+    width: calc(100% - 40px);
+    margin: 0 auto;                  /* 부모 내에서 가운데 정렬 */
+    box-sizing: border-box;  
+    justify-content: center;
+
+    margin-top: 72px;
+}

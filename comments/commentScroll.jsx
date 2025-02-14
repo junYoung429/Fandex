@@ -3,7 +3,7 @@ import "./commentScroll.css";
 import { DefaultProfileIcon, ThumbUp, ThumbDown } from "../components/Icons";
 import { db } from "../src/firebase-config"; // 🔹 Firestore 설정 불러오기
 import { collection, getDocs, doc, getDoc, query, orderBy, updateDoc, increment, arrayUnion, arrayRemove  } from "firebase/firestore";
-import HorseImage from "./horse";
+import HorseImage from "../storage/horse";
 
 function CommentScroll({ userUUID, refresh, setRefresh }) {
   return (
@@ -40,6 +40,7 @@ const SortButtons = () => {
 // ✅ 댓글 리스트 컴포넌트 (Firestore에서 데이터 가져오기)
 const CommentList = ({ userUUID, refresh, setRefresh }) => {
   const [comments, setComments] = useState([]); // 🔹 Firestore에서 가져온 댓글 저장
+  const [loading, setLoading] = useState(true); // 로딩 상태 추가
 
   useEffect(() => {
       const fetchComments = async () => {
@@ -58,9 +59,13 @@ const CommentList = ({ userUUID, refresh, setRefresh }) => {
                   const userDocSnap = await getDoc(userDocRef);
                   
                   if (userDocSnap.exists()) {
-                      commentData.displayName = userDocSnap.data().displayName;
+                    const userData = userDocSnap.data();
+                    commentData.displayName = userData.displayName;
+                    commentData.profileImage = userData.profileImage; // 🔥 여기 추가
+
                   } else {
                       commentData.displayName = "익명 유령";
+                      <DefaultProfileIcon />
                   }
 
                   commentsData.push({ id: docSnap.id, ...commentData });
@@ -69,11 +74,18 @@ const CommentList = ({ userUUID, refresh, setRefresh }) => {
               setComments(commentsData);
           } catch (error) {
               console.error("댓글을 불러오는 중 오류 발생:", error);
+          } finally {
+            setLoading(false); // 데이터 로드 완료 후 로딩 상태 변경
           }
       };
 
       fetchComments();
     }, [refresh]); // 🔹 refresh 값이 변경될 때마다 실행
+
+  if (loading) {
+    // 데이터가 로드 중이면 로딩 UI나 아무것도 표시하지 않도록 처리
+    return <div className="loading">로딩중...</div>;
+  }
 
   return (
       <div>
@@ -173,7 +185,11 @@ const Comments = ({ comment, setRefresh, userUUID }) => {
 
   return (
       <div className="comment-container">
-          <DefaultProfileIcon />
+        <img 
+           src={comment.profileImage} 
+          alt="프로필 이미지" 
+          style={{ width: "32px", height: "32px", marginTop: "4px"}}
+        />
           <div id="comment">
               <div className="comment-title">
                   <span id="username">{comment.displayName}</span> · <span id="date-time">{formatDate(comment.createdAt)}</span>
