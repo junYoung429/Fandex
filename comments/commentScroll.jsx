@@ -4,13 +4,13 @@ import { ThumbUp, ThumbDown } from "../components/Icons";
 import { db } from "../src/firebase-config";
 import { collection, getDocs, doc, getDoc, query, orderBy, updateDoc, increment, arrayUnion, arrayRemove } from "firebase/firestore";
 
-function CommentScroll({ userUUID, refresh, setRefresh }) {
+function CommentScroll({ userUUID, refresh, setRefresh, currentTargetId }) {
   const [sortOrder, setSortOrder] = useState("latest");
 
   return (
     <>
       <SortButtons setSortOrder={setSortOrder} />
-      <CommentList userUUID={userUUID} refresh={refresh} setRefresh={setRefresh} sortOrder={sortOrder} />
+      <CommentList userUUID={userUUID} refresh={refresh} setRefresh={setRefresh} sortOrder={sortOrder} currentTargetId={currentTargetId} />
     </>
   );
 }
@@ -41,14 +41,14 @@ const SortButtons = ({ setSortOrder }) => {
   );
 };
 
-const CommentList = ({ userUUID, refresh, setRefresh, sortOrder }) => {
+const CommentList = ({ userUUID, refresh, setRefresh, sortOrder, currentTargetId }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const commentsRef = collection(db, "voteResults", "투표대상1", "comments");
+        const commentsRef = collection(db, "voteResults", currentTargetId, "comments");
         const q = query(commentsRef, orderBy(sortOrder === "latest" ? "createdAt" : "좋아요", "desc"));
         const querySnapshot = await getDocs(q);
         const commentsData = [];
@@ -64,8 +64,11 @@ const CommentList = ({ userUUID, refresh, setRefresh, sortOrder }) => {
         setLoading(false);
       }
     };
-    fetchComments();
-  }, [refresh, sortOrder]);
+    
+    if (currentTargetId) {  // currentTargetId가 있을 때만 댓글 가져오기
+      fetchComments();
+    }
+  }, [refresh, sortOrder, currentTargetId]);  // dependency에 currentTargetId 추가
 
   if (loading) {
     return <div className="loading">로딩중...</div>;
@@ -75,7 +78,13 @@ const CommentList = ({ userUUID, refresh, setRefresh, sortOrder }) => {
     <div>
       {comments.length > 0 ? (
         comments.map((comment) => (
-          <Comments key={comment.id} comment={comment} userUUID={userUUID} setRefresh={setRefresh}/>
+          <Comments 
+            key={comment.id} 
+            comment={comment} 
+            userUUID={userUUID} 
+            setRefresh={setRefresh}
+            currentTargetId={currentTargetId}
+          />
         ))
       ) : (
         <>
@@ -95,7 +104,7 @@ const CommentList = ({ userUUID, refresh, setRefresh, sortOrder }) => {
   );
 };
 
-const Comments = ({ comment, setRefresh, userUUID }) => {
+const Comments = ({ comment, setRefresh, userUUID, currentTargetId }) => {
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
 
@@ -115,7 +124,7 @@ const Comments = ({ comment, setRefresh, userUUID }) => {
   const handleVote = async (type) => {
     if (!comment.id || !userUUID) return;
     try {
-      const commentRef = doc(db, "voteResults", "투표대상1", "comments", comment.id);
+      const commentRef = doc(db, "voteResults", currentTargetId, "comments", comment.id);
       const commentSnap = await getDoc(commentRef);
       if (commentSnap.exists()) {
         const data = commentSnap.data();

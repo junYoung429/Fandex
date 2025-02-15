@@ -4,11 +4,40 @@ import { useEffect } from "react";
 import { useState } from "react";
 import InfoModal from "../components/popup";
 import ScrollLinked from '../components/Scroll';  // 상단에 import 추가
+import { db } from "../src/firebase-config";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 
-function Vote(){
-    // 🔥 여기서 modalOpen, setModalOpen을 선언
+function Vote({ currentTargetId, setCurrentTargetId }){
     const [modalOpen, setModalOpen] = useState(false);
+    const [currentAffiliate, setCurrentAffiliate] = useState("");
+
+    const handleVote = async (voteType) => {
+        try {
+            // 로컬스토리지에서 UUID 가져오기
+            const userUUID = localStorage.getItem("Fandex_userUUID");
+            if (!userUUID) {
+                console.error("사용자 UUID를 찾을 수 없습니다.");
+                return;
+            }
+
+            // votes 컬렉션에 문서 추가
+            const votesRef = collection(db, "votes");
+            await addDoc(votesRef, {
+                authorUUID: userUUID,
+                type: voteType,  // "응원해요" 또는 "아쉬워요"
+                voteDate: serverTimestamp(),
+                targetId: currentTargetId
+            });
+
+            console.log("투표가 성공적으로 저장되었습니다!");
+            // 여기에 성공 메시지나 UI 업데이트 로직 추가 가능
+
+        } catch (error) {
+            console.error("투표 저장 중 오류 발생:", error);
+            // 여기에 에러 처리 로직 추가 가능
+        }
+    };
 
     return(
         <div>
@@ -37,20 +66,31 @@ function Vote(){
                 }
             />
 
-            <ScrollLinked />
+            <ScrollLinked 
+                onCurrentItemChange={(id, affiliate) => {
+                    setCurrentTargetId(id);
+                    setCurrentAffiliate(affiliate);
+                }} 
+            />
 
             <div className="full-width affiliate-container">
-                <span>부산대학교 총장</span>
+                <span>{currentAffiliate}</span>
             </div>
             <div className="full-width name-container">
-                <span>최재원</span>
+                <span>{currentTargetId}</span>
             </div>
 
             <div className="row-bottom">
-                <div className="voteButton voteButton-like">
+                <div 
+                    className="voteButton voteButton-like"
+                    onClick={() => handleVote("응원해요")}
+                >
                     <span>응원해요</span>
                 </div>
-                <div className="voteButton voteButton-dislike">
+                <div 
+                    className="voteButton voteButton-dislike"
+                    onClick={() => handleVote("아쉬워요")}
+                >
                     <span>아쉬워요</span>
                 </div>
             </div>

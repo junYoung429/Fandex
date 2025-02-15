@@ -5,7 +5,7 @@ import { db } from "../src/firebase-config";
 import { collection, addDoc, serverTimestamp, getDocs } from "firebase/firestore";
 import InfoModal from "../components/popup";
 
-function CommentInput({ userUUID, setRefresh, refresh }) { 
+function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) { 
     const [text, setText] = useState("");
     // 기본값은 localStorage에 미리 저장된 값 또는 하드코딩된 기본 프로필 URL
     const [userName, setUserName] = useState("익명 유령");
@@ -28,7 +28,10 @@ function CommentInput({ userUUID, setRefresh, refresh }) {
   useEffect(() => {
     const fetchCommentCount = async () => {
       try {
-        const commentRef = collection(db, "voteResults", "투표대상1", "comments");
+        // currentTargetId가 있을 때만 댓글 개수를 가져옴
+        if (!currentTargetId) return;
+        
+        const commentRef = collection(db, "voteResults", currentTargetId, "comments");
         const snapshot = await getDocs(commentRef);
         setCommentCount(snapshot.size);
       } catch (error) {
@@ -36,7 +39,7 @@ function CommentInput({ userUUID, setRefresh, refresh }) {
       }
     };
     fetchCommentCount();
-  }, [refresh]);
+  }, [refresh, currentTargetId]);  // currentTargetId를 dependency에 추가
 
     const isValidComment = text.length >= 10; 
 
@@ -47,7 +50,7 @@ function CommentInput({ userUUID, setRefresh, refresh }) {
         }
         try {
             console.log("댓글 저장 시도 중...");
-            const commentRef = collection(db, "voteResults", "투표대상1", "comments");
+            const commentRef = collection(db, "voteResults", currentTargetId, "comments");
             const updatedName = localStorage.getItem("Fandex_userName") || userName;
             const updatedProfile = localStorage.getItem("Fandex_userProfile") || "/default_profile.webp";
             await addDoc(commentRef, {

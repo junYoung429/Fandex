@@ -14,20 +14,32 @@ import "./Scroll.css"
 // ✅ 인디케이터 컴포넌트
 import Indicator from "../test/Indicator";
 
-export default function ScrollLinked() {
+// 파이어베이스 임포트
+import { db } from "../src/firebase-config"; // 🔹 db import 추가!
+import { collection, getDocs } from "firebase/firestore";
+
+export default function ScrollLinked({ onCurrentItemChange }) {
   const ref = useRef(null);
   const { scrollXProgress } = useScroll({ container: ref });
   const maskImage = useScrollOverflowMask(scrollXProgress);
 
   // 기본 아이템 배열
-  const items = [
-    { id: 1, color: "#ff0088" },
-    { id: 2, color: "#dd00ee" },
-    { id: 3, color: "#9911ff" },
-    { id: 4, color: "#0d63f8" },
-    { id: 5, color: "#0cdcf7" },
-    { id: 6, color: "#4ff0b7" },
-  ];
+  const [items, setItems] = useState([]);
+
+  // 파이어베이스에서 데이터 가져오기
+  useEffect(() => {
+    const fetchData = async () => {
+      const querySnapshot = await getDocs(collection(db, "voteResults"));
+      const fetchedItems = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        affiliate: doc.data().affiliate,  // affiliate 필드 추가
+        ...doc.data()
+      }));
+      setItems(fetchedItems);
+    };
+
+    fetchData();
+  }, []);
 
   // 무한 스크롤을 위해 앞뒤로 아이템 복제 (3번 반복)
   const duplicatedItems = [...items, ...items, ...items];
@@ -43,7 +55,7 @@ export default function ScrollLinked() {
     const itemWidth = ul.scrollWidth / duplicatedItems.length;
     const oneSetWidth = itemWidth * items.length;
     ul.scrollLeft = oneSetWidth; // 중간 세트 시작점
-  }, []);
+  }, [items]);
 
   // 스크롤 이벤트로 현재 인덱스 계산
   useEffect(() => {
@@ -81,6 +93,14 @@ export default function ScrollLinked() {
         if (modIndex < 0) modIndex += items.length;
         setCurrentIndex(modIndex);
 
+        // 현재 아이템 ID를 부모 컴포넌트로 전달
+        if (onCurrentItemChange) {
+          onCurrentItemChange(
+            items[modIndex].id,
+            items[modIndex].affiliate  // affiliate도 전달
+          );
+        }
+
         // 다시 스냅 활성화
         ul.style.scrollSnapType = "x mandatory";
         ul.style.scrollBehavior = "smooth";
@@ -92,7 +112,7 @@ export default function ScrollLinked() {
       ul.removeEventListener("scroll", handleScroll);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, []);
+  }, [items, onCurrentItemChange]);
 
   // 인디케이터 dot 클릭 시, 해당 인덱스로 스크롤 이동
   const onDotClick = (index) => {
@@ -171,7 +191,9 @@ export default function ScrollLinked() {
 
         <motion.ul ref={ref} className="scroll-list" style={{ maskImage }}>
           {duplicatedItems.map((item, index) => (
-            <li key={`${item.id}-${index}`} style={{ background: item.color }} />
+            <li key={`${item.id}-${index}`}>
+              {item.affiliate}  {/* affiliate 값 표시 */}
+            </li>
           ))}
         </motion.ul>
 
