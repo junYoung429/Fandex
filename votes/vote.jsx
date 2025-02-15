@@ -3,6 +3,8 @@ import { InfoIcon, MyProfileIcon } from "../components/Icons";
 import { useEffect } from "react";
 import { useState } from "react";
 import InfoModal from "../components/popup";
+import ScrollLinked from '../components/Scroll';  // 상단에 import 추가
+
 
 function Vote(){
     // 🔥 여기서 modalOpen, setModalOpen을 선언
@@ -10,7 +12,7 @@ function Vote(){
 
     return(
         <div>
-            <div className="row">
+            <div className="row-top">
                 <div className="left">
                     <span className="left-text">투표</span>
                     <div onClick={() => setModalOpen(true)} style={{ display: "inline-block", cursor: "pointer" }}>
@@ -34,6 +36,24 @@ function Vote(){
                     </>
                 }
             />
+
+            <ScrollLinked />
+
+            <div className="full-width affiliate-container">
+                <span>부산대학교 총장</span>
+            </div>
+            <div className="full-width name-container">
+                <span>최재원</span>
+            </div>
+
+            <div className="row-bottom">
+                <div className="voteButton voteButton-like">
+                    <span>응원해요</span>
+                </div>
+                <div className="voteButton voteButton-dislike">
+                    <span>아쉬워요</span>
+                </div>
+            </div>
 
         </div>
     )

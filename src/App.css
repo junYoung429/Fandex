@@ -1,3 +1,22 @@
+/* 기존 스타일 리셋 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;  /* 또는 375px로 직접 지정 */
+  max-width: 375px;
+  margin: 0 auto;
+  padding: 0;
+  overflow-x: hidden;  /* 혹시 모를 가로 스크롤 방지 */
+}
+
+body {
+  margin: 0;  /* body의 기본 마진 제거 */
+}
+
 /* 기본 모바일 스타일 (모바일 우선) */
 .container {
     width: 100%;

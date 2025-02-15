@@ -67,13 +67,10 @@ function App() {
   return(
     <>
     <div className="container">
-      <div style={{ marginBottom: '100px', height: '100px', backgroundColor: 'transparent' }}></div>
       <Vote/>
-
       <CommentInput userUUID={userUUID} refresh={refresh} setRefresh={setRefresh}/>
       <CommentScroll userUUID={userUUID} refresh={refresh} setRefresh={setRefresh} />
-      </div>
-
+    </div>
     </>
   );
 }

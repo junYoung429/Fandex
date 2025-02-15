@@ -82,4 +82,51 @@ function ThumbDown({ onClick, fill = "white" }) {
     )
 }
 
-export {UploadIcon, InfoIcon, DefaultProfileIcon, MyProfileIcon, ThumbUp, ThumbDown};
+function RightArrow({ }) {
+    return(
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <g filter="url(#filter0_d_481_1297)">
+            <g mask="url(#mask0_481_1297)">
+            <path d="M10 17V7L15 12L10 17Z" fill="white"/>
+            </g>
+        </g>
+        <defs>
+            <filter id="filter0_d_481_1297" x="-4" y="-4" width="32" height="32" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+            <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset/>
+            <feGaussianBlur stdDeviation="2"/>
+            <feComposite in2="hardAlpha" operator="out"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_481_1297"/>
+            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_481_1297" result="shape"/>
+            </filter>
+        </defs>
+        </svg>
+    )
+}
+
+function LeftArrow({ }) {
+    return(
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <g filter="url(#filter0_d_481_1295)">
+            <g mask="url(#mask0_481_1295)">
+            <path d="M14 17L9 12L14 7V17Z" fill="white"/>
+            </g>
+        </g>
+        <defs>
+            <filter id="filter0_d_481_1295" x="-4" y="-4" width="32" height="32" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+            <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset/>
+            <feGaussianBlur stdDeviation="2"/>
+            <feComposite in2="hardAlpha" operator="out"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_481_1295"/>
+            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_481_1295" result="shape"/>
+            </filter>
+        </defs>
+        </svg>
+    )
+}
+export {UploadIcon, InfoIcon, DefaultProfileIcon, MyProfileIcon, ThumbUp, ThumbDown, RightArrow, LeftArrow};

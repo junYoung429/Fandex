@@ -1,0 +1,79 @@
+#example {
+    width: 100%;
+    max-width: 375px;
+    position: relative;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+#example #progress {
+    position: absolute;
+    top: -65px;
+    left: -15px;
+    transform: rotate(-90deg);
+}
+
+#example .bg {
+    stroke: var(--layer);
+}
+
+#example #progress circle {
+    stroke-dashoffset: 0;
+    stroke-width: 10%;
+    fill: none;
+}
+
+#progress .indicator {
+    stroke: var(--accent);
+}
+
+#example ul {
+    display: flex;
+    list-style: none;
+    height: 220px;
+    overflow-x: scroll;
+    padding: 20px 0;
+    flex: 0 0 600px;
+    max-width: 375px;
+    margin: 0 auto;
+    gap: 20px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    box-sizing: border-box;
+}
+
+#example li {
+    flex: 0 0 200px;
+    background: var(--accent);
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+}
+
+#example ul::-webkit-scrollbar {
+    display: none;
+}
+
+.scroll-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 220px;
+}
+
+.scroll-arrow.right {
+    right: 0;
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.3));
+}
+
+.scroll-arrow.left {
+    left: 0;
+    background: linear-gradient(-90deg, transparent, rgba(0, 0, 0, 0.3));
+} 

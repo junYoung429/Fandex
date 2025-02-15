@@ -36,7 +36,12 @@ textarea::placeholder {
     outline: none;
     background-color: transparent;
     color: #fff;
+
     font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px; /* 142.857% */    
+    font-family: 'SUITE Variable', sans-serif;
 
     padding-right: 25px; /* 아이콘과 겹치지 않도록 오른쪽 패딩 추가 */
 
