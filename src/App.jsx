@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { db, storage } from "./firebase-config"; // 🔹 db import 추가!
+import { db } from "./firebase-config"; // 🔹 db import 추가!
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { ref, getDownloadURL } from "firebase/storage"; // getDownloadURL, ref
 
 import { v4 as uuidv4 } from "uuid"; // UUID 생성 라이브러리
 import './App.css';
@@ -15,7 +14,6 @@ function App() {
 
   const [userUUID, setUserUUID] = useState(null); // ✅ userUUID를 상태로 관리. CommentInput에 props로 넘겨주기 위해 전역 관리
   const [refresh, setRefresh] = useState(false); // 🔹 댓글이 추가될 때마다 재렌더링 트리거
-
 
   useEffect(() => {
     const initializeUser = async () => {
@@ -42,23 +40,12 @@ function App() {
       const userDocSnap = await getDoc(userDocRef);
 
       if (!userDocSnap.exists()) {
-        // ✅ default_profile.png의 다운로드 URL 가져오기
-        let defaultProfileUrl = "";
-        try {
-          // Storage의 루트 경로에 default_profile.png가 있다고 가정
-          const storageRef = ref(storage, "default_profile.png");
-          defaultProfileUrl = await getDownloadURL(storageRef);
-          console.log("가져온 기본 프로필 URL:", defaultProfileUrl);
-        } catch (error) {
-          console.error("기본 프로필 이미지 다운로드 중 오류:", error);
-        }
-
         // Firestore에 유저 데이터 추가
         const newUser = {
           uid: storedUUID,
           displayName: generateRandomUserName(),
-          // ✅ 기본 프로필 이미지 URL을 profileImage 필드에 저장
-          profileImage: defaultProfileUrl,
+          // 기본 프로필 이미지 URL을 profileImage 필드에 저장
+          profileImage: "/default_profile.webp",
           createAt: new Date().toISOString(),
         };
 
@@ -66,13 +53,11 @@ function App() {
         console.log("새로운 유저가 Firestore에 추가되었습니다:", newUser);
         // localStorage에 저장
         localStorage.setItem("Fandex_userName", newUser.displayName);
-        localStorage.setItem("Fandex_userProfile", newUser.profileImage);
       } else {
         const userData = userDocSnap.data();
         console.log("이미 등록된 유저입니다:", userData);
         // localStorage에 업데이트
         localStorage.setItem("Fandex_userName", userData.displayName);
-        localStorage.setItem("Fandex_userProfile", userData.profileImage);
       }
     };
 
@@ -92,8 +77,5 @@ function App() {
     </>
   );
 }
-
-
-
 
 export default App

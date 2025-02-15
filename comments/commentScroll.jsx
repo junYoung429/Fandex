@@ -3,30 +3,37 @@ import "./commentScroll.css";
 import { ThumbUp, ThumbDown } from "../components/Icons";
 import { db } from "../src/firebase-config";
 import { collection, getDocs, doc, getDoc, query, orderBy, updateDoc, increment, arrayUnion, arrayRemove } from "firebase/firestore";
-import HorseImage from "../storage/horse";
 
 function CommentScroll({ userUUID, refresh, setRefresh }) {
+  const [sortOrder, setSortOrder] = useState("latest");
+
   return (
     <>
-      <SortButtons/>
-      <CommentList userUUID={userUUID} refresh={refresh} setRefresh={setRefresh} />
+      <SortButtons setSortOrder={setSortOrder} />
+      <CommentList userUUID={userUUID} refresh={refresh} setRefresh={setRefresh} sortOrder={sortOrder} />
     </>
   );
 }
 
-const SortButtons = () => {
+const SortButtons = ({ setSortOrder }) => {
   const [active, setActive] = useState("latest");
   return (
     <div className="sort-container">
       <button
         className={`sort-button ${active === "popular" ? "active" : ""}`}
-        onClick={() => setActive("popular")}
+        onClick={() => {
+          setActive("popular");
+          setSortOrder("popular");
+        }}
       >
         인기순
       </button>
       <button
         className={`sort-button ${active === "latest" ? "active" : ""}`}
-        onClick={() => setActive("latest")}
+        onClick={() => {
+          setActive("latest");
+          setSortOrder("latest");
+        }}
       >
         최신순
       </button>
@@ -34,7 +41,7 @@ const SortButtons = () => {
   );
 };
 
-const CommentList = ({ userUUID, refresh, setRefresh }) => {
+const CommentList = ({ userUUID, refresh, setRefresh, sortOrder }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +49,7 @@ const CommentList = ({ userUUID, refresh, setRefresh }) => {
     const fetchComments = async () => {
       try {
         const commentsRef = collection(db, "voteResults", "투표대상1", "comments");
-        const q = query(commentsRef, orderBy("createdAt", "desc"));
+        const q = query(commentsRef, orderBy(sortOrder === "latest" ? "createdAt" : "좋아요", "desc"));
         const querySnapshot = await getDocs(q);
         const commentsData = [];
         querySnapshot.forEach((docSnap) => {
@@ -58,7 +65,7 @@ const CommentList = ({ userUUID, refresh, setRefresh }) => {
       }
     };
     fetchComments();
-  }, [refresh]);
+  }, [refresh, sortOrder]);
 
   if (loading) {
     return <div className="loading">로딩중...</div>;
@@ -73,12 +80,17 @@ const CommentList = ({ userUUID, refresh, setRefresh }) => {
       ) : (
         <>
           <div className="no-comments">
-            <HorseImage imagePath="horse.png"/>
+            <img 
+              src="/horse.png" 
+              alt="말 이미지" 
+              style={{ width: "100px", height: "100px", objectFit: "cover" }}
+            />
           </div>
-          <p className="no-comments"> 아직 댓글이 없습니다.</p>
+          <p className="no-comments"> 아직 아무 말도 없어요.</p>
           <div className="spacer"></div>
         </>
       )}
+      <div style={{ height: "30px" }}></div> {/* 마지막 댓글 아래에 30px spacer 추가 */}
     </div>
   );
 };

@@ -2,18 +2,38 @@ import "./vote.css"; // CSS 파일 임포트
 import { InfoIcon, MyProfileIcon } from "../components/Icons";
 import { useEffect } from "react";
 import { useState } from "react";
+import InfoModal from "../components/popup";
 
 function Vote(){
+    // 🔥 여기서 modalOpen, setModalOpen을 선언
+    const [modalOpen, setModalOpen] = useState(false);
+
     return(
         <div>
             <div className="row">
                 <div className="left">
                     <span className="left-text">투표</span>
-                    <InfoIcon/>
+                    <div onClick={() => setModalOpen(true)} style={{ display: "inline-block", cursor: "pointer" }}>
+                        <InfoIcon/>
+                    </div>
                 </div>
                 <MyProfileIcon/>
             </div>
 
+            {/* InfoModal 렌더링 */}
+            <InfoModal
+                isOpen={modalOpen}
+                onRequestClose={() => setModalOpen(false)}
+                message={
+                    <>
+                    FANDEX는
+                    <br />
+                    자체 개발한 투표 집계 시스템을 통해
+                    <br />
+                    항상 최신의 지지율을 반영해요.
+                    </>
+                }
+            />
 
         </div>
     )
