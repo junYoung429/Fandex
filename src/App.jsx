@@ -9,12 +9,13 @@ import { adjectives } from "../utils/nameAdjectives"; // 닉네임 랜덤 형용
 import CommentInput from '../comments/commentInput';
 import CommentScroll from '../comments/commentScroll';
 import Vote from '../votes/vote';
+import CenterMode from '../test/CenterScroll';
 
 function App() {
 
   const [userUUID, setUserUUID] = useState(null); // ✅ userUUID를 상태로 관리. CommentInput에 props로 넘겨주기 위해 전역 관리
   const [refresh, setRefresh] = useState(false); // 🔹 댓글이 추가될 때마다 재렌더링 트리거
-  const [currentTargetId, setCurrentTargetId] = useState(""); // 현재 선택된 투표 대상 ID
+  const [currentTargetId, setCurrentTargetId] = useState(null); // 현재 선택된 투표 대상 ID
 
   useEffect(() => {
     const initializeUser = async () => {
@@ -68,8 +69,12 @@ function App() {
   return(
     <>
     <div className="container">
-      <Vote 
+      {/* <Vote 
         currentTargetId={currentTargetId} 
+        setCurrentTargetId={setCurrentTargetId}
+      /> */}
+      <CenterMode
+        currentTargetId={currentTargetId}
         setCurrentTargetId={setCurrentTargetId}
       />
       <CommentInput 

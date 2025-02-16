@@ -1,0 +1,38 @@
+.circle {
+    width: 100px;
+    height: 100px;
+    background-color: green;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    margin: 0 auto;
+    /* 부드러운 애니메이션을 위해 transition 추가 */
+    transition: transform 0.3s ease;
+    transform: scale(0.75); /* 기본 크기를 줄임 */
+  }
+  
+  /* 
+    react-slick 설정에서 className: "center" 로 주었으므로,
+    슬라이더 부모에 .center가 있고, 중앙 슬라이드에는 .slick-center가 붙음.
+    이 조합으로 '가운데 슬라이드'만 원래 크기로 복원
+  */
+
+  /* CenterMode.css */
+
+/* CenterMode.css */
+
+
+  /* 가운데 슬라이드의 원(circle)만 원래 크기로 복원 */
+  .slick-center .circle {
+    transform: scale(1);
+
+  }
+
+  .slick-arrow.slick-prev:before,
+  .slick-arrow.slick-next:before {
+    content: none !important; /* slick가 기본 제공하는 화살표 아이콘 제거 */
+  }
+  
