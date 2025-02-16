@@ -81,8 +81,8 @@
 
 /* dots 컨테이너 스타일 */
 .slick-dots {
-    position: absolute;
-    bottom: 38vh;
+    position: static;  /* 절대배치 제거 */
+    margin-top: 10px;  /* 슬라이더 아래쪽에 여백만 준다 */
     width: 100%;
     display: flex;
     justify-content: center;

@@ -75,7 +75,10 @@ function App() {
       /> */}
 
       <div style={{ height: "100px" }}></div>
-      <SimpleSlider />
+      <SimpleSlider 
+        currentTargetId={currentTargetId}
+        setCurrentTargetId={setCurrentTargetId}
+      />
 
       <CommentInput 
         userUUID={userUUID} 
