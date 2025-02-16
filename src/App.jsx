@@ -9,6 +9,7 @@ import { adjectives } from "../utils/nameAdjectives"; // 닉네임 랜덤 형용
 import CommentInput from '../comments/commentInput';
 import CommentScroll from '../comments/commentScroll';
 import Vote from '../votes/vote';
+import SimpleSlider from '../test/Carousel';
 
 function App() {
 
@@ -68,10 +69,14 @@ function App() {
   return(
     <>
     <div className="container">
-      <Vote 
+      {/* <Vote 
         currentTargetId={currentTargetId} 
         setCurrentTargetId={setCurrentTargetId}
-      />
+      /> */}
+
+      <div style={{ height: "100px" }}></div>
+      <SimpleSlider />
+
       <CommentInput 
         userUUID={userUUID} 
         refresh={refresh} 

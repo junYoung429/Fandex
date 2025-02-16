@@ -1,0 +1,10 @@
+.custom-arrow {
+    height: 200px;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 화살표 이미지 크기는 그대로 유지 */
