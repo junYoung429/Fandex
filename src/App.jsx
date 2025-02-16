@@ -69,14 +69,11 @@ function App() {
   return(
     <>
     <div className="container">
-      {/* <Vote 
+      <Vote 
         currentTargetId={currentTargetId} 
         setCurrentTargetId={setCurrentTargetId}
-      /> */}
-      <CenterMode
-        currentTargetId={currentTargetId}
-        setCurrentTargetId={setCurrentTargetId}
       />
+
       <CommentInput 
         userUUID={userUUID} 
         refresh={refresh} 

@@ -6,13 +6,15 @@
     padding: 0;
     margin: 0;
     gap: 10px;
-    z-index: 9999; /* 필요시 조정 */
+    top: -52px !important;          /* 원하는 상단 위치 */
+
   }
   
   /* 🔹 기본 dot 스타일 */
   .slick-dots li {
-    width: 6px;
-    height: 6px;
+    width: 6px !important;
+    height: 6px !important;
+  
     border-radius: 2px;
     border: 2px solid var(--fandex-lightGray, #939393);
     transition: all 0.3s ease-in-out;
@@ -32,8 +34,8 @@
   
   /* 🔹 활성 dot(막대) 스타일 */
   .slick-dots li.slick-active {
-    width: 60px;
-    height: 6px;
+    width: 60px !important;
+    height: 6px !important;
     border-radius: 2px;
     border: 2px solid var(--fandex-white, #FFF);
   }

@@ -1,16 +1,37 @@
 import "./vote.css"; // CSS 파일 임포트
 import { InfoIcon, MyProfileIcon } from "../components/Icons";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InfoModal from "../components/popup";
 import ScrollLinked from '../components/Scroll';  // 상단에 import 추가
 import { db } from "../src/firebase-config";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-
+import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
+import CenterMode from "../test/CenterScroll";
 
 function Vote({ currentTargetId, setCurrentTargetId }){
     const [modalOpen, setModalOpen] = useState(false);
     const [currentAffiliate, setCurrentAffiliate] = useState("");
+
+    useEffect(() => {
+        const fetchAffiliate = async () => {
+            if (!currentTargetId) return;
+
+            try {
+                const docRef = doc(db, "voteResults", currentTargetId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    setCurrentAffiliate(data.affiliate || ""); // affiliate 필드 값 설정
+                } else {
+                    console.log("No such document!");
+                }
+            } catch (error) {
+                console.error("Error fetching affiliate:", error);
+            }
+        };
+
+        fetchAffiliate();
+    }, [currentTargetId]);
 
     const handleVote = async (voteType) => {
         try {
@@ -66,11 +87,9 @@ function Vote({ currentTargetId, setCurrentTargetId }){
                 }
             />
 
-            <ScrollLinked 
-                onCurrentItemChange={(id, affiliate) => {
-                    setCurrentTargetId(id);
-                    setCurrentAffiliate(affiliate);
-                }} 
+            <CenterMode
+                currentTargetId={currentTargetId}
+                setCurrentTargetId={setCurrentTargetId}
             />
 
             <div className="full-width affiliate-container">
