@@ -14,53 +14,46 @@ import { RightArrow, LeftArrow } from "../components/Icons";
 import Indicator from "../test/Indicator";
 
 // 도넛 차트 + 중앙 이미지 컴포넌트
-function DonutChartWithCenterImage({ imageUrl }) {
-  // 예시 데이터 (필요에 따라 수정)
-  const data = [
-    { x: "A", y: 50 },
-    { x: "B", y: 50 }
-  ];
-  
-  // 슬라이더 내에서 사용할 크기에 맞게 조정 (약간 크게 보여서 벗어나 보이게)
-  const chartSize = 120;
-  const innerRadius = 50;
-  const centerImageSize = 80;
-  
-  return (
-    <div style={{ position: "relative", width: chartSize, height: chartSize }}>
-      <VictoryPie
-        data={data}
-        innerRadius={innerRadius}
-        width={chartSize}
-        height={chartSize}
-        colorScale={["#7D6CF6", "#B3CE1F"]}
-
-        style={{
-          parent: {
+function DonutChartWithCenterImage({ imageUrl, data }) {
+    const chartSize = 120;
+    const innerRadius = 50;
+    const centerImageSize = 80;
+    
+    return (
+      <div style={{ position: "relative", width: chartSize, height: chartSize }}>
+        <VictoryPie
+          data={data}  // 전달받은 데이터를 그대로 사용
+          innerRadius={innerRadius}
+          width={chartSize}
+          height={chartSize}
+          colorScale={["#7D6CF6", "#B3CE1F", ]}
+          style={{
+            parent: {
+              position: "absolute",
+              top: 0,
+              left: 0
+            },
+            labels: { display: "none" }
+          }}
+        />
+        <img
+          src={imageUrl}
+          alt="Center"
+          style={{
             position: "absolute",
-            top: 0,
-            left: 0
-          },
-          labels: { display: "none" } // 필요 시 라벨 제거
-        }}
-      />
-      <img
-        src={imageUrl}
-        alt="Center"
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: centerImageSize,
-          height: centerImageSize,
-          objectFit: "cover",
-          borderRadius: "50%"
-        }}
-      />
-    </div>
-  );
-}
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: centerImageSize,
+            height: centerImageSize,
+            objectFit: "cover",
+            borderRadius: "50%"
+          }}
+        />
+      </div>
+    );
+  }
+  
 
 function CenterMode({ currentTargetId, setCurrentTargetId }) {
   const [items, setItems] = useState([]);
@@ -129,7 +122,14 @@ function CenterMode({ currentTargetId, setCurrentTargetId }) {
           <div key={item.id}>
             {/* 각 circle에 data-id 속성 추가 */}
             <div className="circle" data-id={item.id}>
-              <DonutChartWithCenterImage imageUrl={item.imageUrl} />
+              <DonutChartWithCenterImage 
+              imageUrl={item.imageUrl} 
+              data={[
+            
+                { x: "아쉬워요", y: item.아쉬워요 },
+                { x: "응원해요", y: item.응원해요 },
+              ]}            
+              />
             </div>
           </div>
         ))}

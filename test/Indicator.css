@@ -5,7 +5,7 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    gap: 10px;
+    gap: 1px;
     top: -52px !important;          /* 원하는 상단 위치 */
 
   }

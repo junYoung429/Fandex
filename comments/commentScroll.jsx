@@ -175,7 +175,14 @@ const Comments = ({ comment, setRefresh, userUUID, currentTargetId }) => {
       <img 
         src={comment.profileImage} 
         alt="프로필 이미지" 
-        style={{ width: "32px", height: "32px", marginTop: "4px"}}
+        style={{ 
+          width: "32px", 
+          height: "32px", 
+          marginTop: "4px", 
+          objectFit: "cover", 
+          objectPosition: "center",
+          borderRadius: "50%"  // 원 모양으로 crop
+        }}
       />
       <div id="comment">
         <div className="comment-title">
