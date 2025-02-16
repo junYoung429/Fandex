@@ -119,6 +119,10 @@ function CenterMode({ currentTargetId, setCurrentTargetId }) {
 
   return (
     <div className="slider-viewport">
+
+        <div className="left-gradient"></div>
+        <div className="right-gradient"></div>
+
       <Indicator total={items.length} currentIndex={currentIndex} />
       <Slider ref={sliderRef} {...settings}>
         {items.map((item) => (

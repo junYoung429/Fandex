@@ -86,7 +86,7 @@ function ThumbDown({ onClick, fill = "white" }) {
 // 커스텀 오른쪽 화살표
 function RightArrow({ className, style, onClick }) {
     return (
-      <div className={className} style={{ ...style, display: "block", right: 10, zIndex: 1 }} onClick={onClick}>
+      <div className={className} style={{ ...style, display: "block", right: 10, zIndex: 9999 }} onClick={onClick}>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
           <g filter="url(#filter0_d_481_1297)">
             <g mask="url(#mask0_481_1297)">
@@ -113,7 +113,7 @@ function RightArrow({ className, style, onClick }) {
   // 커스텀 왼쪽 화살표
   function LeftArrow({ className, style, onClick }) {
     return (
-      <div className={className} style={{ ...style, display: "block", left: 10, zIndex: 1 }} onClick={onClick}>
+      <div className={className} style={{ ...style, display: "block", left: 10, zIndex: 9999 }} onClick={onClick}>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
           <g filter="url(#filter0_d_481_1295)">
             <g mask="url(#mask0_481_1295)">

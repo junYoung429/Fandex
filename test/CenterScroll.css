@@ -36,3 +36,27 @@
     margin: 0 auto;
   }
   
+  /* 🔹 왼쪽 그라디언트 박스 */
+.left-gradient {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%); /* 세로 가운데 정렬 */
+    width: 40px;  /* 폭 */
+    height: 200px; /* 높이 */
+    background: linear-gradient(to right, #101021, transparent);
+    z-index: 2; /* 슬라이더 위로 오도록 (필요에 따라 조정) */
+  }
+  
+  /* 🔹 오른쪽 그라디언트 박스 */
+  .right-gradient {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 200px;
+    background: linear-gradient(to left, #101021, transparent);
+    z-index: 2;
+  }
+  
