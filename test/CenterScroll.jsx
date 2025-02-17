@@ -126,8 +126,8 @@ function CenterMode({ currentTargetId, setCurrentTargetId }) {
               imageUrl={item.imageUrl} 
               data={[
             
-                { x: "아쉬워요", y: item.아쉬워요 },
-                { x: "응원해요", y: item.응원해요 },
+                { x: "아쉬워요", y: item.유효_아쉬워요 },
+                { x: "응원해요", y: item.유효_응원해요 },
               ]}            
               />
             </div>

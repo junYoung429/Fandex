@@ -61,7 +61,7 @@ function InfoModal({ isOpen, onRequestClose, message }) {
           style={{
             boxSizing: "border-box",
             width: "100%",
-            padding: "0 35px", // 좌우 18px padding -> 전체 36px 여백 효과
+            padding: "0 20px", // 좌우 18px padding -> 전체 36px 여백 효과
             color: "white",
             fontFamily: "SUITE Variable",
             textAlign: "center",
@@ -133,7 +133,22 @@ function ProfileModal({ isOpen, onRequestClose, userUUID }) {
     }
   };
 
-  // 닉네임 저장 (onBlur, 엔터 등에서 호출)
+    // 프로필 이미지를 기본값으로 되돌리는 함수
+    const handleResetProfileImage = async () => {
+      try {
+        const defaultUrl = "/default_profile.webp";
+        // Firestore 문서 업데이트
+        const userDocRef = doc(db, "users", userUUID);
+        await setDoc(userDocRef, { profileImage: defaultUrl }, { merge: true });
+        // 로컬 상태도 업데이트
+        setProfileImage(defaultUrl);
+        console.log("프로필 이미지를 기본값으로 되돌렸습니다.");
+      } catch (error) {
+        console.error("프로필 이미지 기본값 복원 중 오류:", error);
+      }
+    };
+
+  // 닉네임 저장 
   const saveDisplayName = async () => {
     if (!displayName) return;
     try {
@@ -145,7 +160,7 @@ function ProfileModal({ isOpen, onRequestClose, userUUID }) {
     }
   };
 
-  // 엔터키 -> 저장 후 blur
+  // 엔터키 -> 저장 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.target.blur(); // onBlur 이벤트 발생 -> saveDisplayName
@@ -165,13 +180,20 @@ function ProfileModal({ isOpen, onRequestClose, userUUID }) {
         <div style={{ height: "60px" }}></div>
 
         {/* 프로필 이미지 */}
-        <div className="profile-image">
+        <div className="profile-image" >
           <img
             src={profileImage}
             alt="Profile"
             onClick={handleImageClick}
             style={{ cursor: "pointer" }}
           />
+            <button
+              className="mini-close-button"
+              onClick={handleResetProfileImage} // 모달 닫기 동작
+              style={{ position: "absolute", top: "4px", right: "4px" }}
+            >
+              <CloseIcon width="32px" height="32px" />
+            </button>
           <input
             type="file"
             ref={fileInputRef}
@@ -202,6 +224,7 @@ function ProfileModal({ isOpen, onRequestClose, userUUID }) {
               onChange={(e) => setDisplayName(e.target.value)}
               onBlur={saveDisplayName}
               onKeyDown={handleKeyDown}
+              maxLength={12} // 12자 이상 제한
               style={{
                 border: "none",
                 outline: "none",

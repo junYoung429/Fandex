@@ -194,12 +194,12 @@ const Comments = ({ comment, setRefresh, userUUID, currentTargetId }) => {
         <div className="comment-thumb">
           <ThumbUp 
             onClick={() => handleVote("like")} 
-            fill={liked ? "#2C9CDB" : "white"}
+            fill={liked ? "#B3CE1F" : "white"}
           /> 
           <span>{comment.좋아요}</span>
           <ThumbDown 
             onClick={() => handleVote("dislike")} 
-            fill={disliked ? "#2C9CDB" : "white"}
+            fill={disliked ? "#7D6CF6" : "white"}
           /> 
           <span>{comment.싫어요}</span>
         </div>

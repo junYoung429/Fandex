@@ -7,13 +7,12 @@ import { InfoModal } from "../components/popup";
 
 function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) { 
   const [text, setText] = useState("");
-  // 기본값은 localStorage에 미리 저장된 값 또는 하드코딩된 기본 프로필 URL
   const [userName, setUserName] = useState("익명 유령");
   const [userProfile, setUserProfile] = useState("/default_profile.webp");
   const [commentCount, setCommentCount] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // localStorage에서 사용자 정보 읽어오기 (초기)
   useEffect(() => {
     if (!userUUID) return;
     const storedName = localStorage.getItem("Fandex_userName");
@@ -22,7 +21,6 @@ function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) {
     setUserProfile(storedProfile);
   }, [userUUID]);
 
-  // 댓글 개수 가져오기
   useEffect(() => {
     const fetchCommentCount = async () => {
       if (!currentTargetId) return;
@@ -40,12 +38,11 @@ function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) {
   const isValidComment = text.length >= 10;
 
   const handleCommentSubmit = async () => {
-    if (text.length < 10 || text.length > 200) {
-      alert("댓글은 10자 이상 200자 이하로 작성해주세요.");
-      return;
-    }
+
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
-      // 🔥 1) Firestore에서 최신 프로필 정보 가져오기
+      console.log("댓글 저장 시도 중...");
       let latestName = userName; 
       let latestProfile = userProfile; 
 
@@ -54,21 +51,17 @@ function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) {
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
           const data = userDocSnap.data();
-          // Firestore에 저장된 최신 displayName, profileImage가 있다면 사용
           if (data.displayName) {
             latestName = data.displayName;
-            // localStorage에도 업데이트 (선택 사항)
             localStorage.setItem("Fandex_userName", data.displayName);
           }
           if (data.profileImage) {
             latestProfile = data.profileImage;
-            // localStorage에도 업데이트 (선택 사항)
             localStorage.setItem("Fandex_userProfile", data.profileImage);
           }
         }
       }
 
-      // 🔥 2) 댓글 문서 생성 시, 최신 프로필 정보로 저장
       const commentRef = collection(db, "voteResults", currentTargetId, "comments");
       await addDoc(commentRef, {
         authorUid: userUUID,
@@ -87,6 +80,8 @@ function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) {
       setRefresh(prev => !prev);
     } catch (error) {
       console.error("댓글 저장 중 오류 발생:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -95,10 +90,7 @@ function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) {
       <div className="row">
         <div className="left" onClick={() => {}}>
           <span className="left-text">댓글</span>
-          <div 
-            onClick={() => setModalOpen(true)} 
-            style={{ display: "inline-block", cursor: "pointer" }}
-          >
+          <div onClick={() => setModalOpen(true)} style={{ display: "inline-block", cursor: "pointer" }}>
             <InfoIcon />
           </div>
         </div>
@@ -110,17 +102,18 @@ function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) {
           placeholder="댓글은 10자 이상 200자 이하로 작성해주세요."
           value={text}
           onChange={(e) => setText(e.target.value)}
+          maxLength={200}
         />
         <div 
           className="upload-button"
-          style={{ pointerEvents: isValidComment ? "auto" : "none" }}
-          onClick={isValidComment ? handleCommentSubmit : undefined}
+          style={{ pointerEvents: (isValidComment && !isSubmitting) ? "auto" : "none" }}
+          onClick={isValidComment && !isSubmitting ? handleCommentSubmit : undefined}
         >
           <UploadIcon 
-            fill={isValidComment ? "#2C9CDB" : "#939393"} 
-            style={{ cursor: isValidComment ? "pointer" : "default" }}
+            fill={(isValidComment && !isSubmitting) ? "#2C9CDB" : "#939393"} 
+            style={{ cursor: (isValidComment && !isSubmitting) ? "pointer" : "default" }}
           />
-        </div>
+        </div>            
       </div>
       <InfoModal
         isOpen={modalOpen}
@@ -131,7 +124,9 @@ function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) {
             <br />
             신중하게 작성해 주세요.
             <br />
-            또한, 지나친 비방이나 욕설이 포함된 댓글은 임의로 삭제될 수 있어요.
+            또한, 지나친 비방이나 욕설이 포함된 댓글은
+            <br />
+            임의로 삭제될 수 있어요.
           </>
         }
       />

@@ -6,19 +6,49 @@ import { db } from "../src/firebase-config";
 import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
 import CenterMode from "../test/CenterScroll";
 
+// 자정까지 남은 시간 계산 (오늘 24시)
+function getTimeLeftUntilMidnight() {
+  const now = new Date();
+  // 오늘 자정(= 내일 0시)
+  // 예: 오늘이 2/17이면, new Date(연도, 월, 일+1, 0,0,0)
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+
+  let diffMs = midnight - now; // 남은 밀리초
+  if (diffMs < 0) {
+    // 이미 자정 지났다면 0으로 처리
+    diffMs = 0;
+  }
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs / (1000 * 60)) % 60);
+  const seconds = Math.floor((diffMs / 1000) % 60);
+
+  return { hours, minutes, seconds };
+}
+
 function Vote({ currentTargetId, setCurrentTargetId }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [currentAffiliate, setCurrentAffiliate] = useState("");
-  const [voted, setVoted] = useState(false); // 🔹 해당 타겟에 대해 "이미 투표했는가" 여부
-  const [voteType, setVoteType] = useState(null); // "응원해요" or "아쉬워요" (선택)
+  const [voted, setVoted] = useState(false); // 해당 타겟에 대해 "이미 투표했는가" 여부
+  const [voteType, setVoteType] = useState(null); // "응원해요" or "아쉬워요"
   const [userUUID, setUserUUID] = useState(localStorage.getItem("Fandex_userUUID"));
 
-  // 🔹 currentTargetId가 바뀔 때마다 Firestore에서 voteinfo 확인
+  // ⏰ 카운트다운 상태: hours, minutes, seconds
+  const [timeLeft, setTimeLeft] = useState(getTimeLeftUntilMidnight());
+
+  // 1) 매초마다 남은 시간 갱신
+  useEffect(() => {
+    const timerId = setInterval(() => {
+      setTimeLeft(getTimeLeftUntilMidnight());
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, []);
+
+  // 2) voteResults에서 현재Target의 affiliate 정보 가져오기
   useEffect(() => {
     const fetchAffiliate = async () => {
       if (!currentTargetId) return;
-
       try {
         const docRef = doc(db, "voteResults", currentTargetId);
         const docSnap = await getDoc(docRef);
@@ -35,7 +65,7 @@ function Vote({ currentTargetId, setCurrentTargetId }) {
     fetchAffiliate();
   }, [currentTargetId]);
 
-  // 🔹 투표 상태(voted) 가져오기
+  // 3) users/{userUUID}/voteinfo/{currentTargetId} 문서 확인 → 투표했는지 여부
   useEffect(() => {
     const fetchVotedInfo = async () => {
       if (!currentTargetId) {
@@ -43,27 +73,22 @@ function Vote({ currentTargetId, setCurrentTargetId }) {
         setVoteType(null);
         return;
       }
-
       const userUUID = localStorage.getItem("Fandex_userUUID");
       if (!userUUID) return;
 
       try {
-        // users/{userUUID}/voteinfo/{currentTargetId} 문서 가져오기
         const voteInfoRef = doc(db, "users", userUUID, "voteinfo", currentTargetId);
         const voteInfoSnap = await getDoc(voteInfoRef);
 
         if (voteInfoSnap.exists()) {
           const voteData = voteInfoSnap.data();
-          // voted가 true이면 "이미 투표한 상태"
           setVoted(!!voteData.voted);
-          // 만약 투표 타입도 저장했다면, 예: { voted: true, type: "응원해요" }
           if (voteData.type) {
             setVoteType(voteData.type);
           } else {
             setVoteType(null);
           }
         } else {
-          // 문서가 없으면 기본 false
           setVoted(false);
           setVoteType(null);
         }
@@ -71,54 +96,66 @@ function Vote({ currentTargetId, setCurrentTargetId }) {
         console.error("Error fetching voteinfo:", error);
       }
     };
-
     fetchVotedInfo();
   }, [currentTargetId]);
 
-  // 🔹 투표 버튼 클릭 시
-// 기존: const votesRef = collection(db, "votes");
-const handleVote = async (voteType) => {
-  try {
-    const userUUID = localStorage.getItem("Fandex_userUUID");
-    if (!userUUID) {
-      console.error("사용자 UUID를 찾을 수 없습니다.");
-      return;
+  // 4) 투표 버튼 클릭 시
+  const handleVote = async (type) => {
+    try {
+      const userUUID = localStorage.getItem("Fandex_userUUID");
+      if (!userUUID) {
+        console.error("사용자 UUID를 찾을 수 없습니다.");
+        return;
+      }
+
+      // 날짜별 경로
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = String(today.getDate()).padStart(2, "0");
+      const datePath = `${year}-${month}-${day}`;
+
+      // votes/{YYYY-MM-DD}/votesDocs
+      const votesRef = collection(db, "votes", datePath, "votesDocs");
+      await addDoc(votesRef, {
+        authorUUID: userUUID,
+        type,
+        voteDate: serverTimestamp(),
+        targetId: currentTargetId
+      });
+
+      // users/{userUUID}/voteinfo/{currentTargetId} 문서 업데이트
+      const voteInfoRef = doc(db, "users", userUUID, "voteinfo", currentTargetId);
+      await setDoc(voteInfoRef, { voted: true, type }, { merge: true });
+
+      console.log("투표가 성공적으로 저장되었습니다!");
+      setVoted(true);
+      setVoteType(type);
+    } catch (error) {
+      console.error("투표 저장 중 오류 발생:", error);
     }
-    
-    // 오늘 날짜를 "YYYY-MM-DD" 형식으로 생성
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    const datePath = `${year}-${month}-${day}`;
-    
-    // votes 컬렉션 아래에 오늘 날짜 폴더, 그 안에 "votesDocs" 하위 컬렉션에 문서 추가
-    const votesRef = collection(db, "votes", datePath, "votesDocs");
-    
-    await addDoc(votesRef, {
-      authorUUID: userUUID,
-      type: voteType,
-      voteDate: serverTimestamp(), // 이 값은 여전히 기록
-      targetId: currentTargetId
-    });
-    
-    // users/{userUUID}/voteinfo/{currentTargetId} 문서를 업데이트 (투표한 정보 기록)
-    const voteInfoRef = doc(db, "users", userUUID, "voteinfo", currentTargetId);
-    await setDoc(voteInfoRef, {
-      voted: true,
-      type: voteType
-    }, { merge: true });
-    
-    console.log("투표가 성공적으로 저장되었습니다!");
-    setVoted(true);
-    setVoteType(voteType);
-  } catch (error) {
-    console.error("투표 저장 중 오류 발생:", error);
-  }
-};
+  };
+
+  // 남은 시간 표시 문자열
+  const { hours, minutes, seconds } = timeLeft;
+  const timeString = (
+    <>
+      다음 투표는{" "}
+      <span style={{ fontWeight: 800, color: "#2C9CDB" }}>
+        {hours}시간 {minutes}분 {seconds}초
+      </span>{" "}
+      후 가능합니다
+    </>
+  );
 
   return (
     <div>
+      <div className="logo-container">
+        <span className="logo-text">
+          <span style={{ color: "#B3CE1F" }}>FAN</span>
+          <span style={{ color: "#7D6CF6" }}>DEX</span>
+        </span>
+      </div>
       <div className="row-top">
         <div className="left">
           <span className="left-text">투표</span>
@@ -141,7 +178,19 @@ const handleVote = async (voteType) => {
             자체 개발한 투표 집계 시스템을 통해
             <br />
             항상 최신의 지지율을 반영해요.
-          </>
+            <br />
+            <br />
+            누적투표수: 투표된 모든 표의 총 개수
+            <br />
+            누적응답수: 투표된 모든 응답
+            <br />
+            (응원해요 or 아쉬워요)의 총 개수
+            <br />
+            유효응답수: 최근 5일 이내 투표된 모든 응답의 표의 가치의 총 합
+            <br />
+            <br />
+            사이트 관련 모든 문의는 seoyoonjsy@naver.com으로 부탁드립니다.
+            </>
         }
       />
 
@@ -163,18 +212,23 @@ const handleVote = async (voteType) => {
       </div>
 
       <div className="row-bottom">
-        {/* 🔹 이미 voted=true 라면, "확장된" 버튼을 하나만 보여주고,
-                아직 voted=false 라면, 버튼 2개(응원해요 / 아쉬워요) 노출 */}
         {voted ? (
-          // 이미 투표한 경우, voteType에 따라 "응원해요" 또는 "아쉬워요" 버튼 확장 상태
-          <div
-            className={`voteButton expanded ${
-              voteType === "응원해요" ? "voteButton-like" : "voteButton-dislike"
-            }`}
-          >
-            <span>{voteType}</span>
+          // 이미 투표한 경우
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+            <div
+              className={`voteButton expanded ${
+                voteType === "응원해요" ? "voteButton-like" : "voteButton-dislike"
+              }`}
+              style={{ marginBottom: "12px" }}
+            >
+              <span>{voteType}</span>
+            </div>
+            <div className="countdown-text">
+              {timeString}
+            </div>
           </div>
         ) : (
+          // 아직 투표 안 했다면
           <>
             <div
               className="voteButton voteButton-like"
