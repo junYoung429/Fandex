@@ -76,39 +76,46 @@ function Vote({ currentTargetId, setCurrentTargetId }) {
   }, [currentTargetId]);
 
   // 🔹 투표 버튼 클릭 시
-  const handleVote = async (voteType) => {
-    try {
-      // votes 컬렉션에도 기록을 남기고 싶다면(기존 로직)
-      const userUUID = localStorage.getItem("Fandex_userUUID");
-      if (!userUUID) {
-        console.error("사용자 UUID를 찾을 수 없습니다.");
-        return;
-      }
-
-      // votes 컬렉션에 기록 (선택사항)
-      const votesRef = collection(db, "votes");
-      await addDoc(votesRef, {
-        authorUUID: userUUID,
-        type: voteType,
-        voteDate: serverTimestamp(),
-        targetId: currentTargetId
-      });
-
-      // 🔹 users/{userUUID}/voteinfo/{currentTargetId} 문서를 { voted: true, type: voteType }로 업데이트
-      const voteInfoRef = doc(db, "users", userUUID, "voteinfo", currentTargetId);
-      await setDoc(voteInfoRef, {
-        voted: true,
-        type: voteType
-      }, { merge: true });
-
-      console.log("투표가 성공적으로 저장되었습니다!");
-      // 로컬 상태 업데이트
-      setVoted(true);
-      setVoteType(voteType);
-    } catch (error) {
-      console.error("투표 저장 중 오류 발생:", error);
+// 기존: const votesRef = collection(db, "votes");
+const handleVote = async (voteType) => {
+  try {
+    const userUUID = localStorage.getItem("Fandex_userUUID");
+    if (!userUUID) {
+      console.error("사용자 UUID를 찾을 수 없습니다.");
+      return;
     }
-  };
+    
+    // 오늘 날짜를 "YYYY-MM-DD" 형식으로 생성
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    const datePath = `${year}-${month}-${day}`;
+    
+    // votes 컬렉션 아래에 오늘 날짜 폴더, 그 안에 "votesDocs" 하위 컬렉션에 문서 추가
+    const votesRef = collection(db, "votes", datePath, "votesDocs");
+    
+    await addDoc(votesRef, {
+      authorUUID: userUUID,
+      type: voteType,
+      voteDate: serverTimestamp(), // 이 값은 여전히 기록
+      targetId: currentTargetId
+    });
+    
+    // users/{userUUID}/voteinfo/{currentTargetId} 문서를 업데이트 (투표한 정보 기록)
+    const voteInfoRef = doc(db, "users", userUUID, "voteinfo", currentTargetId);
+    await setDoc(voteInfoRef, {
+      voted: true,
+      type: voteType
+    }, { merge: true });
+    
+    console.log("투표가 성공적으로 저장되었습니다!");
+    setVoted(true);
+    setVoteType(voteType);
+  } catch (error) {
+    console.error("투표 저장 중 오류 발생:", error);
+  }
+};
 
   return (
     <div>
