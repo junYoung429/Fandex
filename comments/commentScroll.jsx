@@ -2,15 +2,30 @@ import { useEffect, useState } from "react";
 import "./commentScroll.css";
 import { ThumbUp, ThumbDown } from "../components/Icons";
 import { db } from "../src/firebase-config";
-import { collection, getDocs, doc, getDoc, query, orderBy, updateDoc, increment, arrayUnion, arrayRemove } from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  getDoc,
+  updateDoc,
+  increment,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 
-function CommentScroll({ userUUID, refresh, setRefresh, currentTargetId }) {
+function CommentScroll({ userUUID, currentTargetId }) {
   const [sortOrder, setSortOrder] = useState("latest");
 
   return (
     <>
       <SortButtons setSortOrder={setSortOrder} />
-      <CommentList userUUID={userUUID} refresh={refresh} setRefresh={setRefresh} sortOrder={sortOrder} currentTargetId={currentTargetId} />
+      <CommentList
+        userUUID={userUUID}
+        sortOrder={sortOrder}
+        currentTargetId={currentTargetId}
+      />
     </>
   );
 }
@@ -41,34 +56,50 @@ const SortButtons = ({ setSortOrder }) => {
   );
 };
 
-const CommentList = ({ userUUID, refresh, setRefresh, sortOrder, currentTargetId }) => {
-  const [comments, setComments] = useState([]);
+const CommentList = ({ userUUID, sortOrder, currentTargetId }) => {
+  const [allComments, setAllComments] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // onSnapshot을 사용하여 실시간으로 최신순(createdAt 내림차순) 데이터를 구독
   useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const commentsRef = collection(db, "voteResults", currentTargetId, "comments");
-        const q = query(commentsRef, orderBy(sortOrder === "latest" ? "createdAt" : "좋아요", "desc"));
-        const querySnapshot = await getDocs(q);
-        const commentsData = [];
-        querySnapshot.forEach((docSnap) => {
-          // 댓글 도큐먼트에는 이미 displayName, profileImage 등이 저장되어 있음
-          const commentData = docSnap.data();
-          commentsData.push({ id: docSnap.id, ...commentData });
-        });
-        setComments(commentsData);
-      } catch (error) {
-        console.error("댓글을 불러오는 중 오류 발생:", error);
-      } finally {
+    if (!currentTargetId) return;
+
+    const commentsRef = collection(
+      db,
+      "voteResults",
+      currentTargetId,
+      "comments"
+    );
+    const q = query(commentsRef, orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const commentsData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setAllComments(commentsData);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("댓글 실시간 업데이트 중 오류 발생:", error);
         setLoading(false);
       }
-    };
-    
-    if (currentTargetId) {  // currentTargetId가 있을 때만 댓글 가져오기
-      fetchComments();
+    );
+    return () => unsubscribe();
+  }, [currentTargetId]);
+
+  // 클라이언트에서 정렬: 이미 받아온 allComments 배열을 기준으로 정렬
+  const sortedComments = [...allComments].sort((a, b) => {
+    if (sortOrder === "latest") {
+      // 최신순: createdAt 내림차순
+      return b.createdAt?.toDate() - a.createdAt?.toDate();
+    } else {
+      // 인기순: 좋아요 수 내림차순
+      return (b.좋아요 || 0) - (a.좋아요 || 0);
     }
-  }, [refresh, sortOrder, currentTargetId]);  // dependency에 currentTargetId 추가
+  });
 
   if (loading) {
     return <div className="loading">로딩중...</div>;
@@ -76,22 +107,21 @@ const CommentList = ({ userUUID, refresh, setRefresh, sortOrder, currentTargetId
 
   return (
     <div>
-      {comments.length > 0 ? (
-        comments.map((comment) => (
-          <Comments 
-            key={comment.id} 
-            comment={comment} 
-            userUUID={userUUID} 
-            setRefresh={setRefresh}
+      {sortedComments.length > 0 ? (
+        sortedComments.map((comment) => (
+          <Comments
+            key={comment.id}
+            comment={comment}
+            userUUID={userUUID}
             currentTargetId={currentTargetId}
           />
         ))
       ) : (
         <>
           <div className="no-comments">
-            <img 
-              src="/horse.png" 
-              alt="말 이미지" 
+            <img
+              src="/horse.png"
+              alt="말 이미지"
               style={{ width: "100px", height: "100px", objectFit: "cover" }}
             />
           </div>
@@ -99,12 +129,12 @@ const CommentList = ({ userUUID, refresh, setRefresh, sortOrder, currentTargetId
           <div className="spacer"></div>
         </>
       )}
-      <div style={{ height: "30px" }}></div> {/* 마지막 댓글 아래에 30px spacer 추가 */}
+      <div style={{ height: "30px" }}></div>
     </div>
   );
 };
 
-const Comments = ({ comment, setRefresh, userUUID, currentTargetId }) => {
+const Comments = ({ comment, userUUID, currentTargetId }) => {
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
 
@@ -124,7 +154,13 @@ const Comments = ({ comment, setRefresh, userUUID, currentTargetId }) => {
   const handleVote = async (type) => {
     if (!comment.id || !userUUID) return;
     try {
-      const commentRef = doc(db, "voteResults", currentTargetId, "comments", comment.id);
+      const commentRef = doc(
+        db,
+        "voteResults",
+        currentTargetId,
+        "comments",
+        comment.id
+      );
       const commentSnap = await getDoc(commentRef);
       if (commentSnap.exists()) {
         const data = commentSnap.data();
@@ -132,15 +168,17 @@ const Comments = ({ comment, setRefresh, userUUID, currentTargetId }) => {
           if (data.likedBy?.includes(userUUID)) {
             await updateDoc(commentRef, {
               좋아요: increment(-1),
-              likedBy: arrayRemove(userUUID)
+              likedBy: arrayRemove(userUUID),
             });
             setLiked(false);
           } else {
             await updateDoc(commentRef, {
               좋아요: increment(1),
-              싫어요: data.dislikedBy?.includes(userUUID) ? increment(-1) : increment(0),
+              싫어요: data.dislikedBy?.includes(userUUID)
+                ? increment(-1)
+                : increment(0),
               likedBy: arrayUnion(userUUID),
-              dislikedBy: arrayRemove(userUUID)
+              dislikedBy: arrayRemove(userUUID),
             });
             setLiked(true);
             setDisliked(false);
@@ -149,21 +187,23 @@ const Comments = ({ comment, setRefresh, userUUID, currentTargetId }) => {
           if (data.dislikedBy?.includes(userUUID)) {
             await updateDoc(commentRef, {
               싫어요: increment(-1),
-              dislikedBy: arrayRemove(userUUID)
+              dislikedBy: arrayRemove(userUUID),
             });
             setDisliked(false);
           } else {
             await updateDoc(commentRef, {
               싫어요: increment(1),
-              좋아요: data.likedBy?.includes(userUUID) ? increment(-1) : increment(0),
+              좋아요: data.likedBy?.includes(userUUID)
+                ? increment(-1)
+                : increment(0),
               dislikedBy: arrayUnion(userUUID),
-              likedBy: arrayRemove(userUUID)
+              likedBy: arrayRemove(userUUID),
             });
             setDisliked(true);
             setLiked(false);
           }
         }
-        setRefresh(prev => !prev);
+        // onSnapshot을 사용하고 있으므로, 댓글 업데이트는 실시간 반영됨.
       }
     } catch (error) {
       console.error("좋아요/싫어요 업데이트 중 오류 발생:", error);
@@ -172,35 +212,36 @@ const Comments = ({ comment, setRefresh, userUUID, currentTargetId }) => {
 
   return (
     <div className="comment-container">
-      <img 
-        src={comment.profileImage} 
-        alt="프로필 이미지" 
-        style={{ 
-          width: "32px", 
-          height: "32px", 
-          marginTop: "4px", 
-          objectFit: "cover", 
+      <img
+        src={comment.profileImage}
+        alt="프로필 이미지"
+        style={{
+          width: "32px",
+          height: "32px",
+          marginTop: "4px",
+          objectFit: "cover",
           objectPosition: "center",
-          borderRadius: "50%"  // 원 모양으로 crop
+          borderRadius: "50%",
         }}
       />
       <div id="comment">
         <div className="comment-title">
-          <span id="username">{comment.displayName}</span> · <span id="date-time">{formatDate(comment.createdAt)}</span>
+          <span id="username">{comment.displayName}</span> ·{" "}
+          <span id="date-time">{formatDate(comment.createdAt)}</span>
         </div>
         <div className="comment-content">
           <span>{comment.context}</span>
         </div>
         <div className="comment-thumb">
-          <ThumbUp 
-            onClick={() => handleVote("like")} 
+          <ThumbUp
+            onClick={() => handleVote("like")}
             fill={liked ? "#B3CE1F" : "white"}
-          /> 
+          />{" "}
           <span>{comment.좋아요}</span>
-          <ThumbDown 
-            onClick={() => handleVote("dislike")} 
+          <ThumbDown
+            onClick={() => handleVote("dislike")}
             fill={disliked ? "#7D6CF6" : "white"}
-          /> 
+          />{" "}
           <span>{comment.싫어요}</span>
         </div>
       </div>
@@ -211,7 +252,11 @@ const Comments = ({ comment, setRefresh, userUUID, currentTargetId }) => {
 const formatDate = (timestamp) => {
   if (!timestamp) return "날짜 없음";
   const date = timestamp.toDate();
-  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(
+    date.getDate()
+  ).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(
+    date.getMinutes()
+  ).padStart(2, "0")}`;
 };
 
 export default CommentScroll;

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "./commentInput.css";
 import { UploadIcon, InfoIcon } from "../components/Icons";
 import { db } from "../src/firebase-config";
-import { doc, getDoc, collection, addDoc, serverTimestamp, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
 import { InfoModal } from "../components/popup";
 
 function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) { 
@@ -21,24 +21,25 @@ function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) {
     setUserProfile(storedProfile);
   }, [userUUID]);
 
+  // 실시간으로 댓글 개수를 구독하는 useEffect
   useEffect(() => {
-    const fetchCommentCount = async () => {
-      if (!currentTargetId) return;
-      try {
-        const commentRef = collection(db, "voteResults", currentTargetId, "comments");
-        const snapshot = await getDocs(commentRef);
+    if (!currentTargetId) return;
+    const commentRef = collection(db, "voteResults", currentTargetId, "comments");
+    const unsubscribe = onSnapshot(
+      commentRef,
+      (snapshot) => {
         setCommentCount(snapshot.size);
-      } catch (error) {
-        console.error("댓글 개수를 불러오는 중 오류 발생:", error);
+      },
+      (error) => {
+        console.error("댓글 개수를 실시간 업데이트하는 중 오류 발생:", error);
       }
-    };
-    fetchCommentCount();
-  }, [refresh, currentTargetId]);
+    );
+    return () => unsubscribe();
+  }, [currentTargetId]);
 
   const isValidComment = text.length >= 10;
 
   const handleCommentSubmit = async () => {
-
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
@@ -77,7 +78,7 @@ function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) {
 
       console.log("댓글이 성공적으로 저장되었습니다!");
       setText("");
-      setRefresh(prev => !prev);
+      // onSnapshot을 사용하므로 별도의 refresh 없이도 실시간 업데이트됨.
     } catch (error) {
       console.error("댓글 저장 중 오류 발생:", error);
     } finally {
