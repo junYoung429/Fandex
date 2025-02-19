@@ -40,6 +40,10 @@ function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) {
   const isValidComment = text.length >= 10;
 
   const handleCommentSubmit = async () => {
+    if (!isValidComment) {
+      alert("댓글은 최소 10자 이상이어야 합니다.");
+      return;
+    }
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
@@ -107,8 +111,8 @@ function CommentInput({ userUUID, refresh, setRefresh, currentTargetId }) {
         />
         <div 
           className="upload-button"
-          style={{ pointerEvents: (isValidComment && !isSubmitting) ? "auto" : "none" }}
-          onClick={isValidComment && !isSubmitting ? handleCommentSubmit : undefined}
+          style={{ pointerEvents: isSubmitting ? "none" : "auto" }}
+          onClick={handleCommentSubmit}
         >
           <UploadIcon 
             fill={(isValidComment && !isSubmitting) ? "#2C9CDB" : "#939393"} 

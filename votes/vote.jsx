@@ -6,6 +6,7 @@ import { db } from "../src/firebase-config";
 import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
 import CenterMode from "./CenterScroll";
 import VoteAlerts from "./VoteAlert";
+import { STATIC_TARGETS } from "../utils/targets";
 
 // 자정까지 남은 시간 계산 (오늘 24시)
 function getTimeLeftUntilMidnight() {
@@ -48,22 +49,13 @@ function Vote({ currentTargetId, setCurrentTargetId }) {
 
   // 2) voteResults에서 현재Target의 affiliate 정보 가져오기
   useEffect(() => {
-    const fetchAffiliate = async () => {
-      if (!currentTargetId) return;
-      try {
-        const docRef = doc(db, "voteResults", currentTargetId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setCurrentAffiliate(data.affiliate || "");
-        } else {
-          console.log("No such document!");
-        }
-      } catch (error) {
-        console.error("Error fetching affiliate:", error);
-      }
-    };
-    fetchAffiliate();
+    if (!currentTargetId) return;
+    const targetData = STATIC_TARGETS.find((t) => t.id === currentTargetId);
+    if (targetData) {
+      setCurrentAffiliate(targetData.affiliate);
+    } else {
+      setCurrentAffiliate("");
+    }
   }, [currentTargetId]);
 
   // 3) users/{userUUID}/voteinfo/{currentTargetId} 문서 확인 → 투표했는지 여부
@@ -218,7 +210,12 @@ function Vote({ currentTargetId, setCurrentTargetId }) {
         <span>{currentAffiliate}</span>
       </div>
       <div className="full-width name-container">
-        <span>{currentTargetId}</span>
+        <span>
+          {
+            // STATIC_TARGETS에서 이름도 lookup해서 표시
+            STATIC_TARGETS.find((t) => t.id === currentTargetId)?.name || currentTargetId
+          }
+        </span>
       </div>
 
       <div className="row-bottom">
