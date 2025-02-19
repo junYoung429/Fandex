@@ -9,7 +9,7 @@ import { CloseIcon, EditIcon } from "./Icons";
 // 화면 전체를 덮고, 텍스트를 중앙에 배치하기 위한 스타일
 const customModalStyles = {
   overlay: {
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     zIndex: 9999,
   },
   content: {
@@ -78,7 +78,6 @@ function InfoModal({ isOpen, onRequestClose, message }) {
   );
 }
 
-
 function ProfileModal({ isOpen, onRequestClose, userUUID }) {
   const [profileImage, setProfileImage] = useState("/default_profile.webp");
   const [displayName, setDisplayName] = useState("");
@@ -133,20 +132,20 @@ function ProfileModal({ isOpen, onRequestClose, userUUID }) {
     }
   };
 
-    // 프로필 이미지를 기본값으로 되돌리는 함수
-    const handleResetProfileImage = async () => {
-      try {
-        const defaultUrl = "/default_profile.webp";
-        // Firestore 문서 업데이트
-        const userDocRef = doc(db, "users", userUUID);
-        await setDoc(userDocRef, { profileImage: defaultUrl }, { merge: true });
-        // 로컬 상태도 업데이트
-        setProfileImage(defaultUrl);
-        console.log("프로필 이미지를 기본값으로 되돌렸습니다.");
-      } catch (error) {
-        console.error("프로필 이미지 기본값 복원 중 오류:", error);
-      }
-    };
+  // 프로필 이미지를 기본값으로 되돌리는 함수
+  const handleResetProfileImage = async () => {
+    try {
+      const defaultUrl = "/default_profile.webp";
+      // Firestore 문서 업데이트
+      const userDocRef = doc(db, "users", userUUID);
+      await setDoc(userDocRef, { profileImage: defaultUrl }, { merge: true });
+      // 로컬 상태도 업데이트
+      setProfileImage(defaultUrl);
+      console.log("프로필 이미지를 기본값으로 되돌렸습니다.");
+    } catch (error) {
+      console.error("프로필 이미지 기본값 복원 중 오류:", error);
+    }
+  };
 
   // 닉네임 저장 
   const saveDisplayName = async () => {
@@ -154,6 +153,8 @@ function ProfileModal({ isOpen, onRequestClose, userUUID }) {
     try {
       const userDocRef = doc(db, "users", userUUID);
       await setDoc(userDocRef, { displayName }, { merge: true });
+      // localStorage 업데이트
+      localStorage.setItem("Fandex_userName", displayName);
       console.log("디스플레이 이름 업데이트 완료:", displayName);
     } catch (error) {
       console.error("디스플레이 이름 업데이트 중 오류 발생:", error);
@@ -180,20 +181,20 @@ function ProfileModal({ isOpen, onRequestClose, userUUID }) {
         <div style={{ height: "60px" }}></div>
 
         {/* 프로필 이미지 */}
-        <div className="profile-image" >
+        <div className="profile-image">
           <img
             src={profileImage}
             alt="Profile"
             onClick={handleImageClick}
             style={{ cursor: "pointer" }}
           />
-            <button
-              className="mini-close-button"
-              onClick={handleResetProfileImage} // 모달 닫기 동작
-              style={{ position: "absolute", top: "4px", right: "4px" }}
-            >
-              <CloseIcon width="32px" height="32px" />
-            </button>
+          <button
+            className="mini-close-button"
+            onClick={handleResetProfileImage}
+            style={{ position: "absolute", top: "4px", right: "4px" }}
+          >
+            <CloseIcon width="32px" height="32px" />
+          </button>
           <input
             type="file"
             ref={fileInputRef}
@@ -206,8 +207,15 @@ function ProfileModal({ isOpen, onRequestClose, userUUID }) {
         <div style={{ height: "32px" }}></div>
 
         {/* 닉네임 인라인 입력 */}
-        <div className="user-name" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div 
+        <div
+          className="user-name"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <div
             style={{
               display: "inline-flex",
               alignItems: "center",

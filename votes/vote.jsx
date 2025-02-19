@@ -5,6 +5,7 @@ import { InfoModal, ProfileModal } from "../components/popup";
 import { db } from "../src/firebase-config";
 import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
 import CenterMode from "./CenterScroll";
+import VoteAlerts from "./VoteAlert";
 
 // 자정까지 남은 시간 계산 (오늘 24시)
 function getTimeLeftUntilMidnight() {
@@ -108,6 +109,9 @@ function Vote({ currentTargetId, setCurrentTargetId }) {
         return;
       }
 
+      // 로컬스토리지에서 displayName 가져오기
+      const displayName = localStorage.getItem("Fandex_userName") || "익명";
+
       // 날짜별 경로
       const today = new Date();
       const year = today.getFullYear();
@@ -119,9 +123,10 @@ function Vote({ currentTargetId, setCurrentTargetId }) {
       const votesRef = collection(db, "votes", datePath, "votesDocs");
       await addDoc(votesRef, {
         authorUUID: userUUID,
+        displayName, // 투표한 사람의 이름 추가
         type,
         voteDate: serverTimestamp(),
-        targetId: currentTargetId
+        targetId: currentTargetId,
       });
 
       // users/{userUUID}/voteinfo/{currentTargetId} 문서 업데이트
@@ -199,8 +204,13 @@ function Vote({ currentTargetId, setCurrentTargetId }) {
         onRequestClose={() => setProfileModalOpen(false)}
         userUUID={userUUID}
       />
+      
 
-      <div style={{ height: "20px" }}></div>
+      <VoteAlerts />
+
+      {/* <div style={{ height: "20px" }}></div> */}
+
+      <div style={{ height: "76px" }}></div>
 
       <CenterMode currentTargetId={currentTargetId} setCurrentTargetId={setCurrentTargetId} />
 

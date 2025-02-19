@@ -17,8 +17,8 @@
     width: calc(100% - 40px); /* 좌우 20px씩 여백 적용 */
     box-sizing: border-box;
     margin: 0 auto;  /* 부모 내에서 가운데 정렬 */
-    margin-bottom: 64px;
     align-items: center;
+    margin-bottom: 16px;
 }
 
 .left {
