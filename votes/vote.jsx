@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { InfoModal, ProfileModal } from "../components/popup";
 import { db } from "../src/firebase-config";
 import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
-import CenterMode from "../test/CenterScroll";
+import CenterMode from "./CenterScroll";
 
 // 자정까지 남은 시간 계산 (오늘 24시)
 function getTimeLeftUntilMidnight() {

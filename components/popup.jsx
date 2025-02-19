@@ -248,6 +248,4 @@ function ProfileModal({ isOpen, onRequestClose, userUUID }) {
   );
 }
 
-
-
 export { InfoModal, ProfileModal };

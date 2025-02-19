@@ -11,7 +11,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { RightArrow, LeftArrow } from "../components/Icons";
 
 // Indicator 컴포넌트 임포트
-import Indicator from "../test/Indicator";
+import Indicator from "./Indicator";
 
 // 도넛 차트 + 중앙 이미지 컴포넌트
 function DonutChartWithCenterImage({ imageUrl, data }) {

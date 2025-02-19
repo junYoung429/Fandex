@@ -12,9 +12,9 @@
 
   }
 
-  /* 가운데 슬라이드의 원(circle)만 원래 크기로 복원 */
+/* 센터 오는 경우 확대 */
   .slick-center .circle {
-    transform: scale(2); /* 중앙에 있을 때 원래 크기로 복원 */
+    transform: scale(2); 
   }
 
   .slick-arrow.slick-prev:before,
@@ -45,7 +45,7 @@
     width: 40px;  /* 폭 */
     height: 200px; /* 높이 */
     background: linear-gradient(to right, #101021, transparent);
-    z-index: 2; /* 슬라이더 위로 오도록 (필요에 따라 조정) */
+    z-index: 2; 
   }
   
   /* 🔹 오른쪽 그라디언트 박스 */
