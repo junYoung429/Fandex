@@ -19,24 +19,24 @@
 
   .slick-arrow.slick-prev:before,
   .slick-arrow.slick-next:before {
-    content: none !important; /* slick가 기본 제공하는 화살표 아이콘 제거 */
+    content: none !important; /* slick이이 기본 제공하는 화살표 아이콘 제거 */
   }
   
 .circle-image {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* 이미지가 원형에 맞게 잘리도록 설정 */
+  object-fit: cover; /* 이미지가 원형에 맞게 잘리도록  */
 }
 
 
 .slider-viewport {
-    position: relative; /* 자식 요소를 절대 배치하기 위해 */
+    position: relative; /* gradient 요소를 절대 배치하기 위해 */
     width: 100%;
-    max-width: 400px; /* 예시, 원하는 크기로 조정 */
+    max-width: 400px; 
     margin: 0 auto;
   }
   
-  /* 🔹 왼쪽 그라디언트 박스 */
+  /* 🔹 왼쪽 그라디언트 박스 - 왼쪽에 절대배치*/
 .left-gradient {
     position: absolute;
     top: 50%;

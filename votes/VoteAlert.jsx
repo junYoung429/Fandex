@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   collection,
   query,
@@ -7,6 +7,9 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { db } from "../src/firebase-config";
+import { CSSTransition } from "react-transition-group";
+import "./VoteAlert.css";
+
 
 // 오늘 날짜를 "YYYY-MM-DD" 형식으로 반환하는 함수
 const getTodayDatePath = () => {
@@ -20,6 +23,8 @@ const getTodayDatePath = () => {
 function VoteAlerts() {
   const [alertQueue, setAlertQueue] = useState([]);
   const [currentAlert, setCurrentAlert] = useState(null);
+  // CSSTransition에서 사용할 nodeRef
+  const nodeRef = useRef(null);
 
   useEffect(() => {
     // 1) 이미 존재하는 문서의 ID를 저장할 Set
@@ -43,12 +48,11 @@ function VoteAlerts() {
           const docId = change.doc.id;
           const voteData = change.doc.data();
 
-          // "added"와 "modified" 이벤트를 모두 확인합니다.
+          // "added"와 "modified" 이벤트를 모두 확인하며, 서버 확정된 문서만 처리
           if (
             (change.type === "added" || change.type === "modified") &&
-            !change.doc.metadata.hasPendingWrites // 서버에 확정된 문서만 처리
+            !change.doc.metadata.hasPendingWrites
           ) {
-            // 기존에 없는 문서라면 (pending 단계에서 처리되지 못한 경우)
             if (!existingDocs.has(docId)) {
               existingDocs.add(docId);
               newVotes.push({ id: docId, ...voteData });
@@ -83,26 +87,32 @@ function VoteAlerts() {
     }
   }, [currentAlert]);
 
-  // 항상 높이 20px의 영역을 렌더링 (알림이 없으면 투명)
   return (
-    <div
-      style={{
-        ...alertBoxStyle,
-        backgroundColor: currentAlert ? "rgba(0,0,0,0.5)" : "transparent",
-      }}
-    >
-      {currentAlert && (
-        <p style={alertTextStyle}>
-          <span style={{ fontWeight: 700 }}>{currentAlert.displayName}</span> 님이{" "}
-          <span style={{ fontWeight: 700 }}>{currentAlert.targetId}</span> 님을{" "}
-          {currentAlert.type === "응원해요" ? "응원해요" : "아쉬워해요"}!
+    <div style={alertBoxStyle}>
+      <CSSTransition
+        in={!!currentAlert}
+        timeout={300}
+        classNames="alert"
+        unmountOnExit
+        nodeRef={nodeRef}  // nodeRef 전달
+      >
+        <p ref={nodeRef} style={alertTextStyle}>
+          {currentAlert && (
+            <>
+              {currentAlert.type === "응원해요" ? "🔥" : "😣"}
+              &quot;
+              <span style={{ fontWeight: 700 }}>{currentAlert.displayName}</span>
+              &quot; 님이 &quot;
+              <span style={{ fontWeight: 700 }}>{currentAlert.targetId}</span>
+              &quot; 님을 {currentAlert.type === "응원해요" ? "응원해요" : "아쉬워해요"}!
+            </>
+          )}
         </p>
-      )}
+      </CSSTransition>
     </div>
   );
 }
 
-// 항상 높이 20px, 가로 100% 차지
 const alertBoxStyle = {
   width: "100%",
   height: "20px",
@@ -114,6 +124,8 @@ const alertBoxStyle = {
 
 const alertTextStyle = {
   margin: 0,
+  fontWeight: 400,
+  fontFamily: "SUITE Variable",
   fontSize: "14px",
   textAlign: "center",
   color: "white",

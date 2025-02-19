@@ -6,11 +6,10 @@ import { initializeApp } from "firebase-admin/app";
 initializeApp();
 
 // 누적 투표 1분마다 갱신
-
 export const aggregateVotesScheduled = onSchedule(
   {
     schedule: "every 1 minutes", // 매 1분마다 실행
-    timeZone: "Asia/Seoul"
+    timeZone: "Asia/Seoul",
   },
   async (event) => {
     const db = getFirestore();
@@ -23,7 +22,12 @@ export const aggregateVotesScheduled = onSchedule(
     const day = String(now.getDate()).padStart(2, "0");
     const datePath = `${year}-${month}-${day}`;
 
-    console.log("Starting scheduled aggregation for votes from:", datePath, "since", threshold);
+    console.log(
+      "Starting scheduled aggregation for votes from:",
+      datePath,
+      "since",
+      threshold
+    );
 
     try {
       // 오늘 날짜 하위의 votesDocs 컬렉션에서 최근 1분 내 생성된 투표 문서 조회
@@ -39,8 +43,7 @@ export const aggregateVotesScheduled = onSchedule(
         return;
       }
 
-      // 각 targetId별 투표 합산
-      // -> 응원해요, 아쉬워요 뿐 아니라 유효_응원해요, 유효_아쉬워요도 함께 누적
+      // 각 targetId별 투표 합산 (응원해요, 아쉬워요, 유효_응원해요, 유효_아쉬워요 모두)
       const sums = {};
 
       votesQuerySnapshot.forEach((docSnap) => {
@@ -48,18 +51,16 @@ export const aggregateVotesScheduled = onSchedule(
         const targetId = data.targetId;
         if (!targetId) return;
 
-        // 초기화 (응원해요, 아쉬워요 + 유효_응원해요, 유효_아쉬워요)
+        // 초기화
         if (!sums[targetId]) {
           sums[targetId] = {
             응원해요: 0,
             아쉬워요: 0,
             유효_응원해요: 0,
-            유효_아쉬워요: 0
+            유효_아쉬워요: 0,
           };
         }
 
-        // type이 "응원해요"면 응원해요, 유효_응원해요에 1씩
-        // type이 "아쉬워요"면 아쉬워요, 유효_아쉬워요에 1씩
         if (data.type === "응원해요") {
           sums[targetId].응원해요 += 1;
           sums[targetId].유효_응원해요 += 1;
@@ -77,12 +78,11 @@ export const aggregateVotesScheduled = onSchedule(
       for (const targetId in sums) {
         const targetDocRef = db.collection("voteResults").doc(targetId);
 
-        // 응원해요/아쉬워요와 유효_응원해요/유효_아쉬워요를 모두 increment
         batch.update(targetDocRef, {
           응원해요: FieldValue.increment(sums[targetId].응원해요),
           아쉬워요: FieldValue.increment(sums[targetId].아쉬워요),
           유효_응원해요: FieldValue.increment(sums[targetId].유효_응원해요),
-          유효_아쉬워요: FieldValue.increment(sums[targetId].유효_아쉬워요)
+          유효_아쉬워요: FieldValue.increment(sums[targetId].유효_아쉬워요),
         });
 
         batchCount++;
@@ -103,6 +103,7 @@ export const aggregateVotesScheduled = onSchedule(
     }
   }
 );
+
 
 // 모든 유저 투표 가능 초기화   
 export const resetVoteInfo = onSchedule(
@@ -161,40 +162,43 @@ export const resetVoteInfo = onSchedule(
 );
 
 
-// 가중치 계산
+// 가중치 계산: 행사일 기준으로 d+1일마다 0.2씩 하락 (오늘: 1.0, 어제: 0.8, 그저께: 0.6, ...)
 export const computeWeightedVotes = onSchedule(
   {
     // 매일 자정(00:00) KST에 실행
-    schedule: "0 0 * * *", 
-    timeZone: "Asia/Seoul"
+    schedule: "30 21 * * *",
+    timeZone: "Asia/Seoul",
   },
   async (event) => {
     const db = getFirestore();
-
-    // 현재 시각(자정)
-    const now = new Date(); // ex) 2025-02-18T00:00:00 KST
+    const now = new Date();
     console.log("⚖️ 가중치 투표 계산 시작:", now.toISOString());
 
     try {
       // 최종 결과를 저장할 객체: { [targetId]: { 응원해요: number, 아쉬워요: number } }
       const sums = {};
 
-      // 0~4일 전 날짜에 대해 반복
+      // 0~4일 전까지 반복 (오늘: dayOffset=0, 어제: dayOffset=1, ... 최대 4일 전)
       for (let dayOffset = 0; dayOffset <= 4; dayOffset++) {
-        // 가중치 계산: dayOffset=0 -> 1.0, dayOffset=1 -> 0.8, ...
-        const weight = Math.max(1 - 0.2 * dayOffset, 0); 
-        if (weight <= 0) break; // 5일째부터는 0표이므로 무효
+        // 가중치 계산: dayOffset=0 -> 1.0, dayOffset=1 -> 0.8, dayOffset=2 -> 0.6, ...
+        // rawWeight는 부동소수점 계산 결과가 될 수 있으므로, toFixed(1)로 반올림 후 parseFloat로 숫자로 변환
+        const rawWeight = 1 - 0.2 * dayOffset;
+        const weight = parseFloat(Math.max(rawWeight, 0).toFixed(1));
+        if (weight <= 0) break; // 5일째부터는 0표
 
         // dayOffset일 전 날짜(YYYY-MM-DD) 구하기
-        const dateObj = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOffset);
+        const dateObj = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() - dayOffset
+        );
         const year = dateObj.getFullYear();
         const month = String(dateObj.getMonth() + 1).padStart(2, "0");
         const day = String(dateObj.getDate()).padStart(2, "0");
-        const datePath = `${year}-${month}-${day}`; // ex) "2025-02-17"
-
+        const datePath = `${year}-${month}-${day}`;
         console.log(` - [${datePath}] dayOffset=${dayOffset}, weight=${weight}`);
 
-        // votes/{datePath}/votesDocs 하위 컬렉션 가져오기
+        // 해당 날짜 컬렉션 votes/{datePath}/votesDocs 가져오기
         const dayCollectionRef = db.collection(`votes/${datePath}/votesDocs`);
         const daySnapshot = await dayCollectionRef.get();
         if (daySnapshot.empty) {
@@ -202,18 +206,16 @@ export const computeWeightedVotes = onSchedule(
           continue;
         }
 
-        // 문서마다 targetId, type 확인 → sums[targetId]에 weight를 누적
+        // 각 문서별로 targetId와 type에 따라 가중치를 누적
         daySnapshot.forEach((docSnap) => {
           const data = docSnap.data();
-          const targetId = data.targetId;
+          const targetId = data.targetId?.trim();
           const type = data.type;
           if (!targetId || !type) return;
 
-          // 초기화
           if (!sums[targetId]) {
             sums[targetId] = { 응원해요: 0, 아쉬워요: 0 };
           }
-
           if (type === "응원해요") {
             sums[targetId].응원해요 += weight;
           } else if (type === "아쉬워요") {
@@ -222,7 +224,7 @@ export const computeWeightedVotes = onSchedule(
         });
       }
 
-      // 이제 sums 객체를 이용해 voteResults/{targetId} 문서의 유효_응원해요, 유효_아쉬워요를 "덮어쓰기"
+      // sums 객체의 값을 이용해 voteResults/{targetId} 문서의 유효_응원해요, 유효_아쉬워요를 업데이트 (덮어쓰기)
       let batch = db.batch();
       let count = 0;
       const BATCH_SIZE = 500;
@@ -231,13 +233,10 @@ export const computeWeightedVotes = onSchedule(
         const targetRef = db.collection("voteResults").doc(targetId);
         const { 응원해요, 아쉬워요 } = sums[targetId];
 
-        // 가중치 합산값으로 덮어쓰기
-        // (increment가 아니라, 직접 값으로 세팅)
         batch.update(targetRef, {
           유효_응원해요: 응원해요,
-          유효_아쉬워요: 아쉬워요
+          유효_아쉬워요: 아쉬워요,
         });
-
         count++;
         if (count === BATCH_SIZE) {
           await batch.commit();
@@ -258,4 +257,3 @@ export const computeWeightedVotes = onSchedule(
     }
   }
 );
-
