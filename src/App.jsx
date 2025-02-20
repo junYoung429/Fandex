@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { db } from "./firebase-config"; // 🔹 db import 추가!
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, getDocs, collection } from "firebase/firestore";
 
 import { v4 as uuidv4 } from "uuid"; // UUID 생성 라이브러리
 import './App.css';
@@ -9,13 +9,12 @@ import { adjectives } from "../utils/nameAdjectives"; // 닉네임 랜덤 형용
 import CommentInput from '../comments/commentInput';
 import CommentScroll from '../comments/commentScroll';
 import Vote from '../votes/vote';
-import SimpleSlider from '../test/Carousel';
 
 function App() {
 
   const [userUUID, setUserUUID] = useState(null); // ✅ userUUID를 상태로 관리. CommentInput에 props로 넘겨주기 위해 전역 관리
   const [refresh, setRefresh] = useState(false); // 🔹 댓글이 추가될 때마다 재렌더링 트리거
-  const [currentTargetId, setCurrentTargetId] = useState(""); // 현재 선택된 투표 대상 ID
+  const [currentTargetId, setCurrentTargetId] = useState(null); // 현재 선택된 투표 대상 ID
 
   useEffect(() => {
     const initializeUser = async () => {
@@ -42,18 +41,26 @@ function App() {
       const userDocSnap = await getDoc(userDocRef);
 
       if (!userDocSnap.exists()) {
-        // Firestore에 유저 데이터 추가
+        // 1) Firestore에 유저 데이터 추가
         const newUser = {
           uid: storedUUID,
           displayName: generateRandomUserName(),
-          // 기본 프로필 이미지 URL을 profileImage 필드에 저장
           profileImage: "/default_profile.webp",
           createAt: new Date().toISOString(),
         };
-
+      
         await setDoc(userDocRef, newUser);
         console.log("새로운 유저가 Firestore에 추가되었습니다:", newUser);
-        // localStorage에 저장
+      
+        // 2) voteResults 컬렉션에서 모든 대상 문서를 읽어서, voteinfo 하위 컬렉션 생성
+        const voteResultsSnapshot = await getDocs(collection(db, "voteResults"));
+        for (const targetDoc of voteResultsSnapshot.docs) {
+          const targetId = targetDoc.id; // 예: "G-DRAGON"
+          // users/{userUUID}/voteinfo/{targetId} 문서를 false로 초기화
+          const voteInfoRef = doc(db, "users", storedUUID, "voteinfo", targetId);
+          await setDoc(voteInfoRef, { voted: false });
+        }
+      
         localStorage.setItem("Fandex_userName", newUser.displayName);
       } else {
         const userData = userDocSnap.data();
@@ -69,14 +76,8 @@ function App() {
   return(
     <>
     <div className="container">
-      {/* <Vote 
+      <Vote 
         currentTargetId={currentTargetId} 
-        setCurrentTargetId={setCurrentTargetId}
-      /> */}
-
-      <div style={{ height: "100px" }}></div>
-      <SimpleSlider 
-        currentTargetId={currentTargetId}
         setCurrentTargetId={setCurrentTargetId}
       />
 

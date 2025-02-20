@@ -1,4 +1,5 @@
 import "./Icons.css"; // CSS 파일 임포트
+import React from "react";
 
 
 function UploadIcon({ fill, onClick }) {
@@ -82,51 +83,106 @@ function ThumbDown({ onClick, fill = "white" }) {
     )
 }
 
-function RightArrow({ }) {
-    return(
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <g filter="url(#filter0_d_481_1297)">
-            <g mask="url(#mask0_481_1297)">
-            <path d="M10 17V7L15 12L10 17Z" fill="white"/>
-            </g>
-        </g>
-        <defs>
-            <filter id="filter0_d_481_1297" x="-4" y="-4" width="32" height="32" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-            <feFlood floodOpacity="0" result="BackgroundImageFix"/>
-            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-            <feOffset/>
-            <feGaussianBlur stdDeviation="2"/>
-            <feComposite in2="hardAlpha" operator="out"/>
-            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_481_1297"/>
-            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_481_1297" result="shape"/>
-            </filter>
-        </defs>
-        </svg>
-    )
-}
 
-function LeftArrow({ }) {
-    return(
+// 커스텀 오른쪽 화살표
+function RightArrow({ className, style, onClick }) {
+    return (
+      <div className={className} style={{ ...style, display: "block", right: 12, zIndex: 9000 }} onClick={onClick}>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <g filter="url(#filter0_d_481_1295)">
-            <g mask="url(#mask0_481_1295)">
-            <path d="M14 17L9 12L14 7V17Z" fill="white"/>
+          <g filter="url(#filter0_d_481_1297)">
+            <g mask="url(#mask0_481_1297)">
+              <path d="M10 17V7L15 12L10 17Z" fill="white"/>
             </g>
-        </g>
-        <defs>
-            <filter id="filter0_d_481_1295" x="-4" y="-4" width="32" height="32" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-            <feFlood floodOpacity="0" result="BackgroundImageFix"/>
-            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-            <feOffset/>
-            <feGaussianBlur stdDeviation="2"/>
-            <feComposite in2="hardAlpha" operator="out"/>
-            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_481_1295"/>
-            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_481_1295" result="shape"/>
+          </g>
+          <defs>
+            <filter id="filter0_d_481_1297" x="-4" y="-4" width="32" height="32" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+              <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+              <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+              <feOffset/>
+              <feGaussianBlur stdDeviation="2"/>
+              <feComposite in2="hardAlpha" operator="out"/>
+              <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+              <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_481_1297"/>
+              <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_481_1297" result="shape"/>
             </filter>
-        </defs>
+          </defs>
         </svg>
-    )
-}
-export {UploadIcon, InfoIcon, DefaultProfileIcon, MyProfileIcon, ThumbUp, ThumbDown, RightArrow, LeftArrow};
+      </div>
+    );
+  }
+  
+  // 커스텀 왼쪽 화살표
+  function LeftArrow({ className, style, onClick }) {
+    return (
+      <div className={className} style={{ ...style, display: "block", left: 10, zIndex: 9000 }} onClick={onClick}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <g filter="url(#filter0_d_481_1295)">
+            <g mask="url(#mask0_481_1295)">
+              <path d="M14 17L9 12L14 7V17Z" fill="white"/>
+            </g>
+          </g>
+          <defs>
+            <filter id="filter0_d_481_1295" x="-4" y="-4" width="32" height="32" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+              <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+              <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+              <feOffset/>
+              <feGaussianBlur stdDeviation="2"/>
+              <feComposite in2="hardAlpha" operator="out"/>
+              <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+              <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_481_1295"/>
+              <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_481_1295" result="shape"/>
+            </filter>
+          </defs>
+        </svg>
+      </div>
+    );
+  }
+
+  function CloseIcon({ width = 24, height = 24 }) {
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={width}
+        height={height}
+        viewBox="0 0 24 24"
+        fill="none"
+      >
+        <mask
+          id="mask0_1388_1042"
+          style={{ maskType: "alpha" }}
+          maskUnits="userSpaceOnUse"
+          x="0"
+          y="0"
+          width="24"
+          height="24"
+        >
+          <rect width="24" height="24" fill="#D9D9D9" />
+        </mask>
+        <g mask="url(#mask0_1388_1042)">
+          <path
+            d="M8.4 17L12 13.4L15.6 17L17 15.6L13.4 12L17 8.4L15.6 7L12 10.6L8.4 7L7 8.4L10.6 12L7 15.6L8.4 17ZM12 22C10.6167 22 9.31667 21.7375 8.1 21.2125C6.88333 20.6875 5.825 19.975 4.925 19.075C4.025 18.175 3.3125 17.1167 2.7875 15.9C2.2625 14.6833 2 13.3833 2 12C2 10.6167 2.2625 9.31667 2.7875 8.1C3.3125 6.88333 4.025 5.825 4.925 4.925C5.825 4.025 6.88333 3.3125 8.1 2.7875C9.31667 2.2625 10.6167 2 12 2C13.3833 2 14.6833 2.2625 15.9 2.7875C17.1167 3.3125 18.175 4.025 19.075 4.925C19.975 5.825 20.6875 6.88333 21.2125 8.1C21.7375 9.31667 22 10.6167 22 12C22 13.3833 21.7375 14.6833 21.2125 15.9C20.6875 17.1167 19.975 18.175 19.075 19.075C18.175 19.975 17.1167 20.6875 15.9 21.2125C14.6833 21.7375 13.3833 22 12 22Z"
+            fill="white"
+          />
+        </g>
+      </svg>
+    );
+  }
+
+export const EditIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="feather feather-edit"
+  >
+<path d="M2 24V20H22V24H2ZM4 18V13.75L15.2 2.575C15.3833 2.39167 15.5958 2.25 15.8375 2.15C16.0792 2.05 16.3333 2 16.6 2C16.8667 2 17.125 2.05 17.375 2.15C17.625 2.25 17.85 2.4 18.05 2.6L19.425 4C19.625 4.18333 19.7708 4.4 19.8625 4.65C19.9542 4.9 20 5.15833 20 5.425C20 5.675 19.9542 5.92083 19.8625 6.1625C19.7708 6.40417 19.625 6.625 19.425 6.825L8.25 18H4ZM16.6 6.8L18 5.4L16.6 4L15.2 5.4L16.6 6.8Z" />
+</svg>
+);
+
+export {UploadIcon, InfoIcon, DefaultProfileIcon, MyProfileIcon, ThumbUp, ThumbDown, RightArrow, LeftArrow, CloseIcon};
